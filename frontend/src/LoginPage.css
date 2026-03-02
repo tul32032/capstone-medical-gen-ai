@@ -1,0 +1,129 @@
+.login-container{
+  height: 100vh;
+  width: 100vw;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ 
+
+background:
+  url("./assets/B.png") no-repeat center -70% / 600px,
+  linear-gradient(90deg, rgb(38, 50, 55) 25%, rgb(29, 38, 44) 63%, rgb(29, 46, 64) 100%);
+  
+font-family:'segoe UI', sans-serif; 
+}
+.login-content{
+  text-align: center;
+  color: white;
+  margin-top: 100px;
+}
+
+.logo-section h1{
+  font-size: 42px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  margin-top: 50px;
+}
+
+.logo-section p{
+  color:#b5c1c9;
+  margin-bottom: 35px;
+  font-size: 15px;  
+}
+
+.login-card{
+  width: 380px;
+  padding: 40px;
+
+  background: rgba(132, 159, 170, 0.05);
+  backdrop-filter: blur(4px);
+
+  border-radius: 18px;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+  display: flex;
+  flex-direction: column;
+  gap:15px;
+}
+
+.google-btn{
+  padding: 14px;
+
+  background: white;
+  color: #1a1f24;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: 0.25s ease;
+
+}
+
+.google-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(255,255,255,0.3);
+}
+
+.divider{
+  display:flex;
+  align-items: center;
+  gap: 10px;
+
+  color: 9ba7b0;
+  font-size: 13px;
+}
+
+.divider span{
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.15);
+}
+
+.login-card input{
+  padding: 13px;
+
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+
+  border-radius: 8px;
+  color: white;
+
+  font-size: 14px;
+  outline: none; 
+  transition: 0.2s ease;
+}
+.login-card input:focus {
+  border: 1px solid #4d5254;
+  box-shadow: 0 0 8px rgba(62,198,255,0.5);
+}
+
+.sign-in-btn {
+  padding: 14px;
+
+  background: linear-gradient(90deg, #3ec6ff, #2b8eff);
+  border: none;
+
+  border-radius: 10px;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.sign-in-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(59, 135, 168, 0.6);
+}
+
+.sign-in-btn:active {
+  transform: scale(0.98);
+}
