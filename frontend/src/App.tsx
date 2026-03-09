@@ -1,29 +1,16 @@
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
-import LoginPage from './LoginPage'
-import Dashboard from './Dashboard'
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import LoginPage from "./LoginPage"
+import Dashboard from "./Dashboard"
 
-function AppRoutes(){
-  const navigate = useNavigate()
-
-  const handleLogin = () => {
-    navigate('/dashboard')
-  }
-
-  return(
-    <Routes>
-      <Route path="/" element={<LoginPage onLogin={handleLogin}/>}/>
-      <Route path="/dashboard" element={<Dashboard/>}/>
-    </Routes>
-  )
-}
-
-function App(){
-  return(
+function App() {
+  return (
     <BrowserRouter>
-      <AppRoutes/>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
     </BrowserRouter>
   )
 }
-
 
 export default App
