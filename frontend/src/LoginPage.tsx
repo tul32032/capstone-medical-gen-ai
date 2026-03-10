@@ -4,11 +4,26 @@ import google from "./assets/google.png"
 import { useNavigate } from "react-router-dom"
 import React from "react"
 
+const GOOGLE_AUTH_URL =
+  "https://accounts.google.com/o/oauth2/v2/auth?" +
+  new URLSearchParams({
+    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    redirect_uri: "http://localhost:3000/google",
+    response_type: "code",
+    scope: "openid email profile",
+    access_type: "offline",
+    prompt: "select_account",
+  }).toString()
+
 const LoginPage: React.FC = () => {
   const navigate = useNavigate()
 
   const handleLogin = () => {
     navigate("/dashboard")
+  }
+
+  const handleGoogleLogin = () => {
+    window.location.href = GOOGLE_AUTH_URL
   }
 
   return (
@@ -54,7 +69,7 @@ const LoginPage: React.FC = () => {
             <span className="line" />
           </div>
 
-          <button className="googleBtn" type="button">
+          <button className="googleBtn" type="button" onClick={handleGoogleLogin}>
             <span className="googleIcon" aria-hidden="true">
               <img src={google} alt="Google logo" className="google-icon" />
             </span>
