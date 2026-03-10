@@ -1,0 +1,12 @@
+.env
+.env.local
+*.pyc
+__pycache__/
+*.pyo
+.venv/
+venv/
+db.sqlite3
+staticfiles/
+.git/
+.gitignore
+README.md

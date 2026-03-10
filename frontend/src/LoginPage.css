@@ -216,3 +216,9 @@ input:focus {
   width:18px;
   height:18px;
 }
+
+.errorText {
+  color: #dc2626;
+  font-size: 13px;
+  margin: 0;
+}

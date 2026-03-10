@@ -5,18 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import React from "react";
 
-const LoginPage: React.FC = () => {
+const SignupPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await fetch("/api/login/", {
+      const response = await fetch("/api/signup/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -26,17 +26,14 @@ const LoginPage: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.detail ?? "Login failed. Please check your credentials.");
+        setError(data.detail ?? "Signup failed. Please try again.");
         return;
       }
 
       navigate("/dashboard");
     } catch {
-      setError("Login failed. Please check your credentials.");
+      setError("Signup failed. Please try again.");
     }
-  };
-
-  const handleGoogleLogin = () => {
   };
 
   return (
@@ -47,11 +44,11 @@ const LoginPage: React.FC = () => {
 
       <div className="authCard">
         <div className="authHeader">
-          <h1>Welcome back</h1>
-          <p>Enter your credentials to access your account</p>
+          <h1>Create an account</h1>
+          <p>Enter your email and password to get started</p>
         </div>
 
-        <form className="authForm" onSubmit={handleLogin}>
+        <form className="authForm" onSubmit={handleSignup}>
           <label className="field">
             <span className="labelText">Email</span>
             <input
@@ -63,24 +60,20 @@ const LoginPage: React.FC = () => {
             />
           </label>
 
-          <div className="rowBetween">
+          <label className="field">
             <span className="labelText">Password</span>
-            <button type="button" className="linkBtn">
-              Forgot password?
-            </button>
-          </div>
-
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
 
           {error && <p className="errorText">{error}</p>}
 
           <button className="primaryBtn" type="submit">
-            Log in
+            Sign up
           </button>
 
           <div className="dividerRow">
@@ -89,11 +82,7 @@ const LoginPage: React.FC = () => {
             <span className="line" />
           </div>
 
-          <button
-            className="googleBtn"
-            type="button"
-            onClick={handleGoogleLogin}
-          >
+          <button className="googleBtn" type="button">
             <span className="googleIcon" aria-hidden="true">
               <img src={google} alt="Google logo" className="google-icon" />
             </span>
@@ -101,13 +90,13 @@ const LoginPage: React.FC = () => {
           </button>
 
           <div className="footerText">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <button
               type="button"
               className="linkBtn"
-              onClick={() => navigate("/signup")}
+              onClick={() => navigate("/")}
             >
-              Sign up
+              Log in
             </button>
           </div>
         </form>
@@ -116,5 +105,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
-
+export default SignupPage;
