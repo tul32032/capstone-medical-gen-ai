@@ -1,4 +1,3 @@
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import exceptions as rest_exceptions
 
@@ -6,10 +5,11 @@ from django.core.exceptions import ValidationError
 
 from .utils import get_error_message
 from .models import User
+from .backends import JWTCookieAuthentication
 
 
 class ApiAuthMixin:
-    authentication_classes = (JWTAuthentication, )
+    authentication_classes = (JWTCookieAuthentication, )
     permission_classes = (IsAuthenticated, )
 
 

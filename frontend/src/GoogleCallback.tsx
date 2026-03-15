@@ -1,41 +1,47 @@
-import React, { useEffect, useRef } from "react"
-import { useNavigate } from "react-router-dom"
-
-const GOOGLE_CALLBACK_URL = `${import.meta.env.VITE_API_BASE_URL}/api/auth/login/google/`
+import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const GoogleCallback: React.FC = () => {
-  const navigate = useNavigate()
-  const fetched = useRef(false)
+  const navigate = useNavigate();
+  const fetched = useRef(false);
 
   useEffect(() => {
-    if (fetched.current) return
-    fetched.current = true
+    if (fetched.current) return;
+    fetched.current = true;
 
-    const params = new URLSearchParams(window.location.search)
-    const code = params.get("code")
-    const error = params.get("error")
+    const handleCallback = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+      const error = params.get("error");
 
-    if (error || !code) {
-      navigate("/")
-      return
-    }
+      if (error || !code) {
+        navigate("/", { replace: true });
+        return;
+      }
 
-    fetch(`${GOOGLE_CALLBACK_URL}?code=${encodeURIComponent(code)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Auth failed")
-        return res.json()
-      })
-      .then((data) => {
-        localStorage.setItem("access_token", data.access_token)
-        localStorage.setItem("refresh_token", data.refresh_token)
-        navigate("/dashboard")
-      })
-      .catch(() => {
-        navigate("/")
-      })
-  }, [navigate])
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/api/auth/login/google/`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ code }),
+          },
+        );
 
-  return <p>Signing you in...</p>
-}
+        if (!res.ok) throw new Error("Auth failed");
 
-export default GoogleCallback
+        navigate("/dashboard", { replace: true });
+      } catch {
+        navigate("/", { replace: true });
+      }
+    };
+
+    handleCallback();
+  }, [navigate]);
+
+  return <div>Signing you in...</div>;
+};
+
+export default GoogleCallback;

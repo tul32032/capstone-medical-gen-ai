@@ -1,30 +1,30 @@
-import "./LoginPage.css"
-import logo from "./assets/BB1.png"
-import google from "./assets/google.png"
-import { useNavigate } from "react-router-dom"
-import React from "react"
+import "./LoginPage.css";
+import logo from "./assets/BB1.png";
+import google from "./assets/google.png";
+import { useNavigate } from "react-router-dom";
+import React from "react";
 
 const GOOGLE_AUTH_URL =
   "https://accounts.google.com/o/oauth2/v2/auth?" +
   new URLSearchParams({
     client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    redirect_uri: "http://localhost:3000/google",
+    redirect_uri: import.meta.env.VITE_GOOGLE_CALLBACK,
     response_type: "code",
-    scope: "openid email profile",
+    scope: "email profile",
     access_type: "offline",
-    prompt: "select_account",
-  }).toString()
+    prompt: "consent",
+  }).toString();
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleLogin = () => {
-    navigate("/dashboard")
-  }
+    navigate("/dashboard");
+  };
 
   const handleGoogleLogin = () => {
-    window.location.href = GOOGLE_AUTH_URL
-  }
+    window.location.href = GOOGLE_AUTH_URL;
+  };
 
   return (
     <div className="authPage">
@@ -41,8 +41,8 @@ const LoginPage: React.FC = () => {
         <form
           className="authForm"
           onSubmit={(e) => {
-            e.preventDefault()
-            handleLogin()
+            e.preventDefault();
+            handleLogin();
           }}
         >
           <label className="field">
@@ -69,7 +69,11 @@ const LoginPage: React.FC = () => {
             <span className="line" />
           </div>
 
-          <button className="googleBtn" type="button" onClick={handleGoogleLogin}>
+          <button
+            className="googleBtn"
+            type="button"
+            onClick={handleGoogleLogin}
+          >
             <span className="googleIcon" aria-hidden="true">
               <img src={google} alt="Google logo" className="google-icon" />
             </span>
@@ -85,7 +89,7 @@ const LoginPage: React.FC = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;

@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'authentication.middleware.JWTRefreshCookieMiddleware',
 ]
 
 ROOT_URLCONF = 'betesbot.urls'
@@ -129,8 +130,15 @@ STATIC_URL = 'static/'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
+CORS_ALLOW_CREDENTIALS = True
 
 AUTH_USER_MODEL = 'authentication.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'authentication.backends.JWTCookieAuthentication',
+    ],
+}
 
 BASE_FRONTEND_URL = os.getenv('DJANGO_BASE_FRONTEND_URL', default='http://localhost:3000')
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
