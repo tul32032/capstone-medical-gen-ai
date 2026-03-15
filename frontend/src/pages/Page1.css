@@ -1,9 +1,11 @@
 .page-title {
   font-size: 48px;
+  font-weight: 500;
+  font-family:Arial, Helvetica, sans-serif;
   /*color: rgb(71,112,193);*/
-  color: rgb(16, 35, 53);
+  color: rgb(37, 49, 61);
   text-align: center;
-
+  
 }.chat-container{
   display:flex;
   flex-direction:column;

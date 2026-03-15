@@ -1,0 +1,63 @@
+.library-container {
+  width: 100%;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.library-title {
+  font-size: 42px;
+  font-weight: 500;
+  color: rgb(16, 35, 53);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.upload-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.upload-box {
+  background: #4770c1;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.upload-box:hover {
+  background: #5e80c1;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.file-card {
+  width: 180px;
+  height: 140px;
+  background: #f2f2f2;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  font-size: 16px;
+  color: #222;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.empty-text {
+  color: #777;
+  font-size: 18px;
+}
