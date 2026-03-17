@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
 const GoogleCallback: React.FC = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   const fetched = useRef(false);
 
   useEffect(() => {
@@ -15,7 +17,7 @@ const GoogleCallback: React.FC = () => {
       const error = params.get("error");
 
       if (error || !code) {
-        navigate("/", { replace: true });
+        navigate("/login", { replace: true });
         return;
       }
 
@@ -32,14 +34,21 @@ const GoogleCallback: React.FC = () => {
 
         if (!res.ok) throw new Error("Auth failed");
 
-        navigate("/dashboard", { replace: true });
-      } catch {
+        const data = await res.json();
+        setUser({
+          id: data.user.id,
+          firstName: data.user.first_name,
+          lastName: data.user.last_name,
+          email: data.user.email,
+        });
         navigate("/", { replace: true });
+      } catch {
+        navigate("/login", { replace: true });
       }
     };
 
     handleCallback();
-  }, [navigate]);
+  }, [navigate, setUser]);
 
   return <div>Signing you in...</div>;
 };
