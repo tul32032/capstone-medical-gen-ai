@@ -142,6 +142,7 @@ STATIC_URL = 'static/'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://capstone-medical-gen-ai-fe-524283018158.us-central1.run.app'
 ]
 CORS_ALLOW_CREDENTIALS = True
 
