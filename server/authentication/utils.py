@@ -27,7 +27,7 @@ def generate_tokens_for_user(user):
     return access_token, refresh_token
 
 
-def google_get_access_token(*, code: str, redirect_uri: str) -> str:
+def google_get_access_token(*, code: str, redirect_uri: str) -> tuple[str, str | None]:
     data = {
         "code": code,
         "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
@@ -41,13 +41,34 @@ def google_get_access_token(*, code: str, redirect_uri: str) -> str:
     if not response.ok:
         raise ValidationError("Failed to obtain access token from Google.")
 
-    access_token = response.json()["access_token"]
+    tokens = response.json()
+    access_token = tokens["access_token"]
+    refresh_token = tokens.get("refresh_token")
 
-    return access_token
+    return access_token, refresh_token
+
+
+def google_refresh_access_token(*, refresh_token: str) -> str:
+    data = {
+        "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
+        "client_secret": settings.GOOGLE_OAUTH2_CLIENT_SECRET,
+        "refresh_token": refresh_token,
+        "grant_type": "refresh_token",
+    }
+
+    response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data)
+
+    if not response.ok:
+        raise ValidationError("Google refresh token is invalid or expired.")
+
+    return response.json()["access_token"]
 
 
 def google_get_user_info(*, access_token: str) -> dict[str, Any]:
-    response = requests.get(GOOGLE_USER_INFO_URL, params={"access_token": access_token})
+    response = requests.get(
+        GOOGLE_USER_INFO_URL,
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
 
     if not response.ok:
         raise ValidationError("Failed to obtain user info from Google.")

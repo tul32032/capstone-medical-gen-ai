@@ -1,79 +1,69 @@
-from urllib.parse import urlencode
 from rest_framework import serializers
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
-from django.shortcuts import redirect
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.response import Response
-from .mixins import PublicApiMixin, ApiErrorsMixin
-from .utils import google_get_access_token, google_get_user_info
+from rest_framework import status
+from .mixins import PublicApiMixin, ApiAuthMixin, ApiErrorsMixin
+from .utils import google_get_access_token, google_get_user_info, generate_tokens_for_user
 from .models import User
 from .serilizers import UserSerializer
-
-
-def generate_tokens_for_user(user):
-    """
-    Generate access and refresh tokens for the given user
-    """
-    serializer = TokenObtainPairSerializer()
-    token_data = serializer.get_token(user)
-    access_token = token_data.access_token
-    refresh_token = token_data
-    return access_token, refresh_token
+from .constants import ACCESS_TOKEN_COOKIE, ACCESS_TOKEN_MAX_AGE
 
 
 class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
     class InputSerializer(serializers.Serializer):
-        code = serializers.CharField(required=False)
-        error = serializers.CharField(required=False)
+        code = serializers.CharField(required=True)
 
-    def get(self, request, *args, **kwargs):
-        input_serializer = self.InputSerializer(data=request.GET)
+    def post(self, request, *args, **kwargs):
+        input_serializer = self.InputSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
 
-        validated_data = input_serializer.validated_data
+        code = input_serializer.validated_data['code']
+        redirect_uri = f'{settings.BASE_FRONTEND_URL}/auth/callback'
 
-        code = validated_data.get('code')
-        error = validated_data.get('error')
-
-        login_url = f'{settings.BASE_FRONTEND_URL}/login'
-    
-        if error or not code:
-            params = urlencode({'error': error})
-            return redirect(f'{login_url}?{params}')
-
-        redirect_uri = f'{settings.BASE_FRONTEND_URL}/google'
-        access_token = google_get_access_token(code=code, 
-                                               redirect_uri=redirect_uri)
-
-        user_data = google_get_user_info(access_token=access_token)
+        google_access_token, google_refresh_token = google_get_access_token(
+            code=code,
+            redirect_uri=redirect_uri,
+        )
+        user_data = google_get_user_info(access_token=google_access_token)
 
         try:
             user = User.objects.get(email=user_data['email'])
-            access_token, refresh_token = generate_tokens_for_user(user)
-            response_data = {
-                'user': UserSerializer(user).data,
-                'access_token': str(access_token),
-                'refresh_token': str(refresh_token)
-            }
-            return Response(response_data)
         except User.DoesNotExist:
             username = user_data['email'].split('@')[0]
-            first_name = user_data.get('given_name', '')
-            last_name = user_data.get('family_name', '')
-
             user = User.objects.create(
                 username=username,
                 email=user_data['email'],
-                first_name=first_name,
-                last_name=last_name,
+                first_name=user_data.get('given_name', ''),
+                last_name=user_data.get('family_name', ''),
                 registration_method='google',
             )
-         
-            access_token, refresh_token = generate_tokens_for_user(user)
-            response_data = {
-                'user': UserSerializer(user).data,
-                'access_token': str(access_token),
-                'refresh_token': str(refresh_token)
-            }
-            return Response(response_data)
+
+        if google_refresh_token:
+            user.google_refresh_token = google_refresh_token
+            user.save(update_fields=['google_refresh_token'])
+
+        access_token, _ = generate_tokens_for_user(user)
+
+        response = Response({'user': UserSerializer(user).data})
+        response.set_cookie(
+            ACCESS_TOKEN_COOKIE,
+            str(access_token),
+            max_age=ACCESS_TOKEN_MAX_AGE,
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite='Lax',
+        )
+        return response
+
+
+class MeApi(ApiAuthMixin, APIView):
+    def get(self, request, *args, **kwargs):
+        return Response({'user': UserSerializer(request.user).data})
+
+class Logout(PublicApiMixin, ApiErrorsMixin, APIView):
+    def post(self, request, *args, **kwargs):
+        response = Response({"success": True})
+        response.delete_cookie("access_token")
+        return response

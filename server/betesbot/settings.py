@@ -24,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-97(*vd0=h0her-7wp=f^*hanlw_#2xq1om#s63-_lf9xqf+6dm'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(os.getenv("DEBUG", 0)) == 1
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
 
 
 # Application definition
@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'authentication.middleware.JWTRefreshCookieMiddleware',
 ]
 
 ROOT_URLCONF = 'betesbot.urls'
@@ -81,13 +82,28 @@ WSGI_APPLICATION = 'betesbot.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+             'ENGINE': 'django.db.backends.{}'.format(
+                 os.getenv('DATABASE_ENGINE', 'postgresql')
+             ),
+             'NAME': os.getenv('DATABASE_NAME', 'postgres'),
+             'USER': os.getenv('DATABASE_USERNAME', 'postgres'),
+             'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
+             'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+             'PORT': os.getenv('DATABASE_PORT', 5432),
+        }
+    }
+
+print(DATABASES)
 
 
 # Password validation
@@ -129,8 +145,15 @@ STATIC_URL = 'static/'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
+CORS_ALLOW_CREDENTIALS = True
 
 AUTH_USER_MODEL = 'authentication.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'authentication.backends.JWTCookieAuthentication',
+    ],
+}
 
 BASE_FRONTEND_URL = os.getenv('DJANGO_BASE_FRONTEND_URL', default='http://localhost:3000')
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
