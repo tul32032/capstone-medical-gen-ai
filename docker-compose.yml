@@ -1,0 +1,35 @@
+services:
+  pgdb:
+    image: postgres
+    container_name: pgdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    env_file:
+      - ./server/.env
+
+  frontend:
+    build: ./frontend/
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - django-api
+    env_file:
+      - ./frontend/.env
+
+  django-api:
+    build: ./server/
+    container_name: django-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pgdb
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server:/app
+
+volumes:
+  postgres_data:
