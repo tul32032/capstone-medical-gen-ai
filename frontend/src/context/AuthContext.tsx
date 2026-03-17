@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { AuthUser } from "../types/AuthUser";
+import { API_BASE_URL } from "../constants/constants";
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -15,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const logout = async () => {
-    await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/logout/`, {
+    await fetch(`${API_BASE_URL}/api/auth/logout/`, {
       method: "POST",
       credentials: "include",
     });
@@ -23,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me/`, {
+    fetch(`${API_BASE_URL}/api/auth/me/`, {
       credentials: "include",
     })
       .then((res) => (res.ok ? res.json() : null))
