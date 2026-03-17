@@ -8,7 +8,6 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
-    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install uv
@@ -24,4 +23,6 @@ RUN adduser --disabled-password --gecos '' appuser && \
 
 USER appuser
 
-CMD ["sh", "-c", "uv run python manage.py migrate && uv run gunicorn betesbot.wsgi:application --bind 0.0.0.0:$PORT --workers 4"]
+EXPOSE 8000
+
+CMD ["uv", "run", "gunicorn", "betesbot.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
