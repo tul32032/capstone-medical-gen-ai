@@ -3,12 +3,13 @@ import logo from "./assets/BB1.png";
 import google from "./assets/google.png";
 import { useNavigate } from "react-router-dom";
 import React from "react";
+import { GOOGLE_CLIENT_ID, GOOGLE_CALLBACK } from "./constants/constants";
 
 const GOOGLE_AUTH_URL =
   "https://accounts.google.com/o/oauth2/v2/auth?" +
   new URLSearchParams({
-    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    redirect_uri: import.meta.env.VITE_GOOGLE_CALLBACK,
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: GOOGLE_CALLBACK,
     response_type: "code",
     scope: "email profile",
     access_type: "offline",

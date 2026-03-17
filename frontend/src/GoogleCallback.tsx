@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { API_BASE_URL } from "./constants/constants";
 
 const GoogleCallback: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const GoogleCallback: React.FC = () => {
 
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/auth/login/google/`,
+          `${API_BASE_URL}/api/auth/login/google/`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

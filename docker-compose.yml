@@ -16,8 +16,6 @@ services:
       - "3000:3000"
     depends_on:
       - django-api
-    env_file:
-      - ./frontend/.env
 
   django-api:
     build: ./server/
