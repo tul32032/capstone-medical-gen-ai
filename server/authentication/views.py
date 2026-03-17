@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework import status
-from .mixins import PublicApiMixin, ApiErrorsMixin
+from .mixins import PublicApiMixin, ApiAuthMixin, ApiErrorsMixin
 from .utils import google_get_access_token, google_get_user_info, generate_tokens_for_user
 from .models import User
 from .serilizers import UserSerializer
@@ -58,8 +58,12 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         return response
 
 
-class MeApi(ApiErrorsMixin, APIView):
-    permission_classes = [IsAuthenticated]
-
+class MeApi(ApiAuthMixin, APIView):
     def get(self, request, *args, **kwargs):
         return Response({'user': UserSerializer(request.user).data})
+
+class Logout(PublicApiMixin, ApiErrorsMixin, APIView):
+    def post(self, request, *args, **kwargs):
+        response = Response({"success": True})
+        response.delete_cookie("access_token")
+        return response
