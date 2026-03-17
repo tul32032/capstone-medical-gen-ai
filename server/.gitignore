@@ -9,6 +9,7 @@ venv/
 .env
 .env.local
 .env.production
+.env.dev
 
 # Django
 *.log
