@@ -9,9 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUserDoctor,
   faFileLines,
-  faClockRotateLeft,
-  faCircleUser,
-  faArrowRightFromBracket,
+  faGear,
+  faRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons';
 
 import logo from './assets/BB2.png';
@@ -22,6 +21,13 @@ const Dashboard = () => {
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   return (
@@ -36,56 +42,35 @@ const Dashboard = () => {
         </div>
 
         <nav className="sidebar-nav">
-          <div className="top-section">
+          <ul>
             <li>
-              <Link to="/dashboard" className="nav-link">
+              <Link to="/" className="nav-link">
                 <FontAwesomeIcon icon={faUserDoctor} className="nav-icon" />
                 {!collapsed && <span className="nav-text">New Chat</span>}
               </Link>
             </li>
 
             <li>
-              <Link to="/dashboard/page2" className="nav-link">
+              <Link to="/page2" className="nav-link">
                 <FontAwesomeIcon icon={faFileLines} className="nav-icon" />
                 {!collapsed && <span className="nav-text">Document Library</span>}
               </Link>
             </li>
 
             <li>
-              <Link to="/dashboard/page3" className="nav-link">
-                <FontAwesomeIcon icon={faClockRotateLeft} className="nav-icon" />
-                {!collapsed && <span className="nav-text">History</span>}
+              <Link to="/page3" className="nav-link">
+                <FontAwesomeIcon icon={faGear} className="nav-icon" />
+                {!collapsed && <span className="nav-text">Page3</span>}
               </Link>
             </li>
-          </div>
 
-          {!collapsed && (
-            <div className="bottom-section">
-              <div className="user-section">
-                <div className="user-card">
-                  <FontAwesomeIcon icon={faCircleUser} className="nav-icon" />
-
-                  <div className="user-info">
-                    <span className="user-name">Your Name</span>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="logout-icon-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate('/');
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faArrowRightFromBracket}
-                      className="logout-icon"
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+            <li>
+              <button onClick={handleLogout} type="button" className="nav-link logout-link">
+                <FontAwesomeIcon icon={faRightFromBracket} className="nav-icon" />
+                {!collapsed && <span className="nav-text">Logout</span>}
+              </button>
+            </li>
+          </ul>
         </nav>
       </aside>
 
