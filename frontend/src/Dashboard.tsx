@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import Page1 from './pages/Page1';
 import Page2 from './pages/Page2';
@@ -6,12 +6,19 @@ import Page3 from './pages/Page3';
 import './Dashboard.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserDoctor, faFileLines, faGear } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUserDoctor,
+  faFileLines,
+  faClockRotateLeft,
+  faCircleUser,
+  faArrowRightFromBracket,
+} from '@fortawesome/free-solid-svg-icons';
 
 import logo from './assets/BB2.png';
 
 const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -29,7 +36,7 @@ const Dashboard = () => {
         </div>
 
         <nav className="sidebar-nav">
-          <ul>
+          <div className="top-section">
             <li>
               <Link to="/dashboard" className="nav-link">
                 <FontAwesomeIcon icon={faUserDoctor} className="nav-icon" />
@@ -46,11 +53,39 @@ const Dashboard = () => {
 
             <li>
               <Link to="/dashboard/page3" className="nav-link">
-                <FontAwesomeIcon icon={faGear} className="nav-icon" />
-                {!collapsed && <span className="nav-text">Page3</span>}
+                <FontAwesomeIcon icon={faClockRotateLeft} className="nav-icon" />
+                {!collapsed && <span className="nav-text">History</span>}
               </Link>
             </li>
-          </ul>
+          </div>
+
+          {!collapsed && (
+            <div className="bottom-section">
+              <div className="user-section">
+                <div className="user-card">
+                  <FontAwesomeIcon icon={faCircleUser} className="nav-icon" />
+
+                  <div className="user-info">
+                    <span className="user-name">Your Name</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="logout-icon-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/');
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faArrowRightFromBracket}
+                      className="logout-icon"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </nav>
       </aside>
 

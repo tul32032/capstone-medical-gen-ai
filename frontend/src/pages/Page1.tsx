@@ -10,7 +10,7 @@ const Page1 = () => {
     console.log("User message:", message);
     setMessage("");
   };
-
+  
   return (
     <div className="chat-container">
       <h1 className="page-title">Ask about diabetes!</h1>
