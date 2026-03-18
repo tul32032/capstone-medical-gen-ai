@@ -52,3 +52,22 @@
 .send-btn:hover{
   background:#5e80c1;
 }
+
+.send-btn:disabled{
+  background:#a0b4d8;
+  cursor:not-allowed;
+}
+
+.response-container{
+  width:880px;
+  max-width:90%;
+  background:white;
+  border:1px solid #ddd;
+  border-radius:16px;
+  padding:20px 24px;
+  font-size:16px;
+  color:#25313d;
+  text-align:left;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
