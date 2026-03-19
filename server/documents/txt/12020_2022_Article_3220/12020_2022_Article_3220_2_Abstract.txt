@@ -1,0 +1,12 @@
+[TAGS]
+Source: 12020_2022_Article_3220.pdf
+Page: 1
+Section: Abstract
+---
+Background Diabetes insipidus (DI) is a recognised complication of pituitary surgery, with diagnosis requiring clinical observation aided by plasma and urine electrolytes and osmolalities. Copeptin is a stable surrogate marker of AVP release and has potential to facilitate prompt diagnosis of post-operative DI. This assay has been shown to accurately predict which patients are likely to develop DI following pituitary surgery.
+
+Objective To determine whether copeptin analysis can be used to predict which patients are at risk of developing DI following trans-sphenoidal surgery (TSS).
+
+Methods Seventy-eight patients undergoing TSS had samples taken for copeptin pre-operatively and at day 1 post-TSS. The majority of patients also had samples from day 2, day 8, and week 6 post-TSS. Results from patients who developed postoperative DI (based on clinical assessment, urine and plasma biochemistry and the need for treatment with DDAVP) were compared to those who did not. Patients with any evidence of pre-operative DI were excluded.
+
+Keywords Copeptin ● AVP ● Diabetes insipidus ● Pituitary ● Neurosurgery

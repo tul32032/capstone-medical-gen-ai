@@ -1,0 +1,67 @@
+[TAGS]
+Source: 12885_2015_Article_1620.pdf
+Page: 6
+Section: Having
+---
+normoglycemia
+prior to admission and normal BMI and mildly elevated
+glycated hemoglobin on admission, indicated that the
+hyperglycemia was CS-induced and suggested that the
+other glucocorticoid receptor-related manifestations of
+CS may take longer time to develop. Severe hypokalemia
+and hyperkaliuria were likely due to activation of min-
+eralocorticoid receptors by elevated cortisol that evaded
+inactivation by 11-beta-hydroxysteroid dehydrogenase.
+The polyuria in our patient was not explained by
+hyperglycemia as it persisted after its correction and was
+associated with low urine osmolality. Further, the degree
+and persistence of polyuria were more than expected
+from the degree of hypokalemia, suggesting a neurogenic
+DI component. This was confirmed by a partial response
+to DDAVP, recurrence after stopping DDAVP, and an
+ADH that was inappropriately in the low normal range.
+DI was reported in two MTC patients without CS [4, 5]
+and in two patients with small-cell lung cancer and CS
+tuitary MRI in our patient was normal, suggesting func-
+tional neurogenic DI. As little as 30 mg prednisolone for
+5 days inhibited osmotically-stimulated ADH secretion,
+however, urine osmolar concentration was unaffected;
+perhaps due to ADH-independent renal compensatory
+mechanisms [6]. We postulate that elevated cortisol in our
+patient caused ADH suppression and hypokalemia pre-
+vented the proposed compensatory mechanisms. Interest-
+ingly, after blocking cortisol action and correction of
+hypokalemia, urine output normalized and mild hypona-
+tremia developed.
+This is the first reported case of failure of elevated
+cortisol to decrease in MTC-related CS treated with
+multikinase inhibitors. In the two cases treated with
+vandetanib [8, 9] and one case treated with sorafenib
+[10], cortisol normalized within a week. Nevertheless,
+CS was reversed in our patient, necessitating discon-
+tinuation of the previously-required, large doses of po-
+tassium, spironolactone, antihypertensives, and insulin.
+Although mifepristone may have played a role in diabetes
+mellitus remission, it could not explain remission of
+hypertension and hypokalemia, its dose was relatively
+small, and diabetes mellitus remission persisted despite its
+withdrawal.
+The mechanisms underlying reduction of cortisol
+concentration in this setting may be multifactorial. In
+one case, vandetanib resulted in simultaneous decrease
+in cortisol and calcitonin and a blunted response of
+ACTH to DDAVP without reduction in tumor size, sug-
+gesting a direct antisecretory action [8]. In another case,
+sorafenib reduced cortisol and ACTH with modest re-
+duction in calcitonin and CEA, suggesting a selective in-
+hibition of ACTH and cortisol secretion; reduction in
+POMC mRNA expression through MAPK pathway
+inhibition, ACTH action down-regulation by down-
+stream signaling pathway inhibition, and adrenal ische-
+mia were postulated [10]. In the third case, vandetanib
+resulted in sustained (26 months) normalization of cor-
+tisol and ACTH. However, a mild re-increase in ACTH
+without an increase in cortisol occurred while on van-
+detanib [9]. In our patient, there was a remarkable de-
+crease
+in

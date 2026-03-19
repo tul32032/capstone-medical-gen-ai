@@ -1,0 +1,12 @@
+[TAGS]
+Source: 11892_2015_Article_702.pdf
+Page: 2
+Section: Clinical Diagnosis
+---
+It is important for physicians to provide an accurate and prompt diagnosis of Wolfram syndrome, which allows us to provide patients with support and education and initiate appropriate interventions. Suspicion of the diagnosis of Wolfram syndrome is usually based on history and clinical manifestations. Most commonly, the observation of optic nerve atrophy after the diagnosis of diabetes mellitus under the age of 16 triggers the suspicion. Increasing evidence indicates that Wolfram syndrome is a spectrum disorder. Diabetes insipidus, sensorineural deafness, neurological signs including ataxia, autonomic neuropathy, and epilepsy, and neurogenic bladder in combination with diabetes mellitus or optic nerve atrophy could be a sign of Wolfram syndrome. The differential diagnoses include mitochondrial disorders, mutant WFS1 geneinduced deafness, autosomal dominant optic nerve atrophy, Friedreich ataxia, Bardet–Biedl syndrome, and Alstr m syndrome.
+
+Confirmation of the Diagnosis
+
+Page 3 of 8
+
+[FIGURE_CAPTION] Development of diagnostics and therapeutics for Wolfram syndrome

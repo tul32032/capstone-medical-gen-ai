@@ -1,0 +1,26 @@
+[TAGS]
+Source: 11892_2015_Article_702.pdf
+Page: 4
+Section: Psychiatric Manifestations
+---
+Anxiety and depression are commonly seen [7, 8, 24]. Psychosis is seen in some patients but not very common. A consultation with a psychiatrist is recommended. Anxiety and depression are treatable in standard way. Cognitive function is usually normal in patients with Wolfram syndrome, especially in younger patients [25].
+
+Etiology and Drug Targets
+
+Page 5 of 8
+
+transmembrane protein localized to the ER [14]. In patients with WFS2 mutations, diabetes mellitus and hearing impairment are reported. Their clinical phenotype differs from patients carrying WFS1 mutations for the absence of diabetes insipidus and for the presence of upper intestinal ulcers and defective platelet aggregation [32], suggesting that there are different and overlapping functions of WFS1 and WFS2.
+
+Targeting Endoplasmic Reticulum Dysfunction — with Currently Available Drugs Drug Repurposing
+
+One strategy for expediting the development of new therapeutic options for Wolfram syndrome is drug repurposing  [33]. Drug repurposing is the use of currently approved drugs by regulatory agencies, such as the United States Food and Drug Administration (FDA) and the European Commission and the European Medicines Agency (EMA), to find therapies for other diseases. This is an attractive therapeutic option because the development of novel treatment compounds takes a lot of time and money, which can be avoided by the use of readily available FDA-approved drugs. In the treatment of Wolfram syndrome, drugs can be targeted to several areas of ER dysfunction including modulators of ER stress, ER calcium homeostasis, and cellular proteostasis [34–36].
+
+Chemical chaperones are small compounds which can stabilize protein conformation during folding and improve trafficking of mutant proteins through the ER [37]. Currently, there are two FDA-approved chemical chaperones, 4-phenylbutyric acid (PBA) and tauroursodeoxycholic acid (TUDCA). In WFS1-deficient β cells, there is an increased level of ER stress and decreased insulin content, both of which can be normalized by treatment with chaperones [38•]. This suggests that PBA and TUDCA may improve β cell functions and prevent ER stress-mediated
+
+β cell death and neurodegeneration in patients with Wolfram syndrome.
+
+Proper function of the ER requires a steep calcium gradient; without this gradient, cells undergo ER stress and cell death. Thus, targeting drugs known to maintain ER calcium levels during ER stress presents a novel therapeutic target for Wolfram syndrome. In β cells, ER stress has been shown to elicit ER calcium depletion resulting in β cell death, which can be prevented with pharmacologic restoration of ER calcium levels [39]. Several currently FDA-approved compounds have been shown to preserve ER calcium levels in response to ER stress. We have recently discovered that dantrolene which targets ryanodine receptor localized to the ER membrane prevents β cell death and neurodegeneration in animal models and cell models with Wolfram syndrome [19••]. Interventional studies using dantrolene and other ER calcium stabilizers should be considered.
+
+Development of Drugs Targeting the Endoplasmic Reticulum
+
+Because currently available drugs are not specifically designed to target ER stress or ER dysfunction, we should create novel small molecules to control ER homeostasis in Wolfram syndrome in addition to using FDA-approved drugs . There are three major pillars that sustain ER homeostasis: calcium homeostasis, redox regulation, and protein folding. Accumulating evidence suggests that WFS1 protein plays a role in maintaining ER calcium homeostasis, raising the possibility that small molecules that can regulate ER calcium levels may prevent cell death in Wolfram syndrome. One of the major genes required for ER calcium homeostasis in β cells is sarco/ endoplasmic reticulum Ca[2+] -ATPase (SERCA) [40]. It has been reported that WFS1 binds to SERCA and modulates its function [41]. Thus, a small molecule that can

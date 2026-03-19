@@ -1,0 +1,20 @@
+[TAGS]
+Source: 12020_2022_Article_3220.pdf
+Page: 5
+Section: Discussion
+---
+We demonstrate that the greatest value of copeptin is in the exclusion of DI following TSS. Copeptin values ≥3.4 pmol/l
+
+[FIGURE_CAPTION] Comparison of copeptin results between those with transient DI (transient, green) and those with permanent DI (permanent, red) at the pre-operatively and at day 1, day 2, day 8 and week 6. Circles represent individual values, while horizontal lines represent the median values (thick line) and interquartile range (thin lines)
+
+In this group of 78 patients undergoing TSS, we find a 14.1% incidence of post-operative DI, which is in line with published data [15]. Although the DI group were significantly younger than the non-DI group, previous studies have not demonstrated a relationship between copeptin levels and age [16]. In our study, there was no significant difference in the gender distribution between DI and no DI groups—baseline copeptin levels have been reported as
+
+higher in males, but this has not been shown to be true of stimulated copeptin levels [7]. Given no patients with low eGFR, heart failure or diabetes mellitus developed DI, we were unable to assess whether these conditions alter diagnostic cut-offs. However, the effect of these on copeptin levels in this setting warrants further investigation prior to use in these groups.
+
+This study has some limitations. Firstly, our study used retrospective batch analysis of samples collected at routine time points as opposed to real-time analyses/assay. To our knowledge, no centres are currently using the copeptin assay in real-time, with most freeze-thawing samples for later batch analysis. In order to evaluate if contemporaneous copeptin results will affect day-to-day management and discharge of pituitary surgical patients, the assay will need to be used in real-time and our centre has now set up such a facility to provide results on day 1 post-TSS.
+
+Secondly, we may have missed the ‘peak’ copeptin provoked by manipulation of the gland. Berton et al. have shown that 1 h post-extubation samples have a greater predictive value for diagnosis of DI [17]. In support of this, the Christ-Crain group demonstrated greatest discriminative power in samples taken at less than 12 h following operation [10], although recent work by Vanasuntorn et al. has shown good predictive value within the first 24 h after surgery [18]. We are keen to limit blood sampling for patients but it may be that an earlier sampling time, soon after surgery, would yield a more discriminative copeptin threshold for discharge.
+
+A further consideration is the use of post-operative fluid restriction. The rationale for this is that it prevents masking of the diagnostic biochemical features of DI through excessive water intake. This protocol necessitates close clinical and biochemical monitoring, to prevent dehydration, with restriction lifted if patients show any features of DI.
+
+Finally, it is worth noting that the small numbers used preclude use of copeptin as the sole tool for determining discharge at day 1. It should be used in conjunction with other clinical and biochemical parameters to make an overall assessment until further evidence on use of copeptin is available.

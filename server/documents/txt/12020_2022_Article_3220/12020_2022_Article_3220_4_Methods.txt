@@ -1,0 +1,30 @@
+[TAGS]
+Source: 12020_2022_Article_3220.pdf
+Page: 2
+Section: Methods
+---
+Patient selection
+
+Baseline characteristics, including gender, age, tumour type, lesion size and renal function were obtained from electronic patient records.
+
+Lesion characteristics
+
+Patients underwent pre-operative magnetic resonance imaging of the pituitary with contrast and all scans were reported by a Neuroradiologist. Lesions <1 cm in diameter were classified as microadenomas and those ≥1 cm in diameter classified as macroadenomas. Following resection, tumour histology was determined and reported by Neuropathologists based on immunohistochemical characteristics.
+
+Surgery and post-operative protocol
+
+All TSS were carried out by a single Neurosurgical team. Operations were carried out under general anaesthetic using endoscopic techniques.
+
+Patients remained in hospital for a minimum of 48 hours, and were fluid restricted to 2 litres per day post-operatively, to prevent masking of biochemical abnormalities through compensatory drinking. During admission, blood and urine
+
+samples were obtained routinely at day 1 and day 2 postoperatively to assess for biochemical evidence of DI. If there was clinical suspicion of DI, urgent laboratory samples were sent and treatment promptly initiated, pending biochemical confirmation.
+
+Diagnosis and treatment of DI
+
+Sample collection
+
+Patients undergoing TSS have samples taken for routine biochemistry pre-operatively, and subsequently at day 1, day 2, day 8, and week 6 post-TSS. Day 1 samples were typically taken on the morning after surgery. Aliquots at each of these time points were frozen for retrospective copeptin batch analysis.
+
+Laboratory analysis
+
+Copeptin was analysed using the Brahms KRYPTOR immunofluorescence assay (Thermo Fisher Scientific), with reproducibility of 6.8% coefficient of variation (CV) at 5.1 pmol/l and 3.9% CV at 99.3 pmol/l.

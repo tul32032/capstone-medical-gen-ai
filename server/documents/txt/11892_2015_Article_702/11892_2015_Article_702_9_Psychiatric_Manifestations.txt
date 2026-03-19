@@ -1,0 +1,22 @@
+[TAGS]
+Source: 11892_2015_Article_702.pdf
+Page: 5
+Section: Psychiatric Manifestations
+---
+[FIGURE_CAPTION] Power of Wolfram syndrome. It has been established that endoplasmic reticulum (ER) dysfunction and ER stress are critical pathogenic components of Wolfram syndrome. It would be possible to identify biomarkers and treatments targeting ER in mechanistically
+
+homogenous Wolfram syndrome patients, which may lead to a breakthrough for treatments of common diseases, such as type 1 diabetes, type 2 diabetes, and neurodegeneration, in which ER dysfunction is involved
+
+Page 6 of 8
+
+activate SERCA and maintain high ER calcium levels under pathological conditions could prevent death of neurons and β cells in Wolfram syndrome. Another possibility is to target calcium channels in the ER, such as ryanodine receptors and inositol trisphosphate receptors. We have recently reported that dantrolene which targets ryanodine receptors can prevent the death of neurons and β cells in Wolfram syndrome using mouse models and induced pluripotent stem cell (iPSC) models of the disease [19••]. We are currently developing novel therapeutics using small molecules targeting these mediators of ER calcium homeostasis in collaboration with the drug development team at the National Center for Advancing Translational Sciences, National Institutes of Health.
+
+Regenerative Therapy and Gene Therapy for Wolfram syndrome
+
+between physicians, researchers, and patient organizations is also important to conduct successful clinical trials.
+
+Power of Wolfram Syndrome
+
+Increasing evidence indicates that ER stress and ER dysfunction play important roles in the pathogenesis of common diseases, such as type 1 and type 2 diabetes, as well as multiple neurodegenerative diseases [46]. Its monogenic etiology makes Wolfram syndrome more amenable to revealing the mechanisms of ER stress-mediated cell death than other common conditions in which multiple factors typically interact to produce the disease manifestations. Thus, Wolfram syndrome represents an ideal model to shed new light on the underlying causes of β cell death in diabetes, neurodegeneration, and retinal cell death mediated by ER dysfunction.
+
+We believe in the strong power of Wolfram syndrome to understand the pathogenesis and develop novel therapeutic modalities for more prevalent diseases. Our study on Wolfram may lead to a breakthrough for treatments of not only Wolfram syndrome but also common diseases, such as type 1 diabetes, type 2 diabetes, and neurodegeneration, in which ER dysfunction is involved .

@@ -1,0 +1,54 @@
+[TAGS]
+Source: 12020_2022_Article_3220.pdf
+Page: 3
+Section: Results
+---
+Baseline characteristics
+
+Baseline characteristics of the cohort are shown in Table 1. The 78 patients undergoing TSS had a median age of 55 (range 22–85), with 41 of 78 being men (52.6%). Two patients had estimated glomerular filtration rates <30 ml/ min/1.73 m[2] , two had heart failure, and 11 had type 2 diabetes mellitus, but none of these developed DI. The majority of lesions (72/78; 92.3%) were macroadenomas, while histologically gonadotroph tumours were the most common (37/78; 47.4%).
+
+Incidence of diabetes insipidus
+
+Of the 78 patients included, 11 (14.1%) were diagnosed with DI post-operatively and required treatment with desmopressin. Of these, seven (9.0%) remained on desmopressin treatment after 3 months and were presumed to have permanent DI, while the other four (5.1%) did not require desmopressin after their first post-operative week.
+
+Characteristics of patients developing diabetes insipidus
+
+Table 1 Baseline characteristics of participants
+
++-------------------------------+-----------------+------------+
+|                               | No. of patients | Percentage |
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
+| Gender                        |                 |            |
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
+| Co-morbidities                |                 |            |
++-------------------------------+-----------------+------------+
+| Severe chronic kidney disease | 2               | 2.6%       |
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
+| Diabetes mellitus             | 11              | 14.1%      |
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
+| Histology                     |                 |            |
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
+| Craniopharyngioma             | 3               | 3.8%       |
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
++-------------------------------+-----------------+------------+
+
+The gender, renal function, histology and lesion size of n = 78 participants included in the study are shown, as well as the percentage with each characteristic. ‘Other’ histological diagnoses were: non-neoplastic pituitary tissue (n = 2), meningothelial tumour, fibrotic tissue with lymphocytic infiltrate, foreign-body material (no native tissue)
+
+between the two groups. There was no significant difference in lesion size between the groups, with the majority of lesions exceeding 1 cm in diameter in both groups. Postoperative medications which may influence AVP levels are given in Table 2.
+
+Copeptin results
+
+A total of 44 patients had samples collected at all time points, although two did not have samples at the day 8 and/ or 6 weeks. A further 34 patients had samples analysed preoperatively and at day 1 post-operatively only.

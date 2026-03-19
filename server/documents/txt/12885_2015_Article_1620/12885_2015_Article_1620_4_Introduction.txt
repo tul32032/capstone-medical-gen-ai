@@ -1,0 +1,82 @@
+[TAGS]
+Source: 12885_2015_Article_1620.pdf
+Page: 2
+Section: Introduction
+---
+Cushing’s syndrome (CS) refers to signs and symptoms
+caused by excessive glucocorticoids action through gluco-
+corticoid and occasionally mineralocorticoid receptors.
+Ectopic adrenocorticotropic hormone (ACTH) secretion
+accounts for < 10 % of CS; [1] up to 7.5 % of which are
+due to medullary thyroid cancer (MTC) [2, 3].
+Diabetes insipidus (DI) has been reported in two
+patients with ectopic CS and sellar metastasis [4, 5].
+Although glucocorticoids can suppress antidiuretic hor-
+mone (ADH) secretion, DI has not been reported in CS
+without sellar lesions, possibly due to compensatory
+renal mechanisms [6].
+MTC arises from neuroendocrine calcitonin-producing
+parafollicular C cells of the thyroid gland; it ectopically
+secrets ACTH in about 0.6 % of patients [7]. Three case
+reports described successful treatment of ectopic CS in
+MTC patients with multikinase inhibitors; in all cases, CS
+remission was associated with reduction in cortisol con-
+centration [8–10].
+Cardiovascular complications are rather common in
+CS; however, aortic dissection has been reported in only
+three cases [11]. Intestinal intussusception is rare in
+adults and is secondary to a pathological condition in
+90 % of cases [12]. It has not been reported in MTC
+patients. Paraneoplastic dysautonomia has been associ-
+ated with neuroendocrine tumors other than MTC [13].
+We report a case of severe CS in a patient with meta-
+static MTC, which was complicated by DI without sellar
+lesion, silent aortic dissection, jejunal intussusception,
+and dysautonomia. Interestingly, sorafenib was associ-
+ated with remission of CS without measurable reduction
+in cortisol concentration.
+Case presentation
+Case report
+A 30-year old male with MTC presented with 3-week
+history of severe polyuria, nocturia, polydipsia, salty taste,
+skin rash, insomnia, and delusion. He denied vomiting,
+diarrhea, pain, dyspnea, cough, and fever.
+He was referred about 4.5 years earlier after having total
+thyroidectomy that showed multifocal MTC with cervical
+lymph nodes metastasis. His past medical and surgical
+history was otherwise unremarkable. He had no family his-
+tory of MTC, other tumors, or consanguinity, and negative
+screening for pheochromocytoma, hyerparathyroidism, and
+germline RET (rearranged during transfection) oncogene
+mutation. Calcitonin and carcinoembryonic antigen (CEA)
+mal, <4.3), respectively. Over the following year, he
+underwent bilateral neck dissection for extensive regional
+lymph node metastasis followed by external radiation.
+Computed tomography (CT) scan showed normal liver
+and bilateral pulmonary metastases. Calcitonin and
+4 months prior to admission. One year before admis-
+sion, random glucose was 5.22 mmol/L.
+On admission (day one), he was afebrile and appeared
+body mass index 20.9 kg/m2. He had multiple facial
+erythematous papules and few pustules but no moon
+face, centripetal obesity, supraclavicular fullness, cervical
+fat pad, striae, easy bruising, or stigmata of chronic liver
+disease except for non-tender hepatomegaly. He had
+normal muscle power and deep tendon reflexes. White
+25.7 mmol/L, albumin 35 g/L (normal, 32–48), total biliru-
+bin 12 μmol/L (normal, <21), alanine aminotransaminase
+venous fluid and potassium replacement, enoxaparin
+40 mg/d, and topical acne treatment were started, and
+Urine output was consistently >8 L/d, while plasma
+and 2.6/2.3 (normal, 4.2–4.2) mmol/L, respectively.
+Intranasal desmopressin (DDAVP) 40 μg/d reduced
+urine output to 4.85 L/d (sodium, potassium, and
+to pmol/L multiply by 0.22), respectively, urinary free
+drostenedione sulfate (DHEAS) 50.8 μmol/L (normal,
+4.42–11.50), dehydroepiandrostenedione (DHEA) 12 ng/
+mL (Mayo Medical Laboratories (MML), Mayo Clinic,
+Rochester, MN; normal, <13; to convert to nmol/L
+multiply by 3.47), androstendione >35 nmol/L (normal,
+2.4-12.6), renin 19.6 mU/L (normal, 4.4–46.1), and
+aldosterone < 8 ng/dL (MML; normal, < 21; to convert
+suppression test showed a paradoxical increase in cortisol
