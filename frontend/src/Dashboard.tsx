@@ -6,15 +6,21 @@ import Page3 from './pages/Page3';
 import './Dashboard.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserDoctor, faFileLines, faGear, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from './context/AuthContext';
+import {
+  faUserDoctor,
+  faFileLines,
+  faClockRotateLeft,
+  faCircleUser,
+  faArrowRightFromBracket,
+} from '@fortawesome/free-solid-svg-icons';
 
+import { useAuth } from './context/AuthContext';
 import logo from './assets/BB2.png';
 
 const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const { logout } = useAuth();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -24,6 +30,9 @@ const Dashboard = () => {
     await logout();
     navigate('/login');
   };
+
+  const fullName =
+    user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : 'Your Name';
 
   return (
     <div className="dashboard-container">
@@ -37,44 +46,65 @@ const Dashboard = () => {
         </div>
 
         <nav className="sidebar-nav">
-          <ul>
+          <div className="top-section">
             <li>
-              <Link to="/" className="nav-link">
+              <Link to="/dashboard" className="nav-link">
                 <FontAwesomeIcon icon={faUserDoctor} className="nav-icon" />
                 {!collapsed && <span className="nav-text">New Chat</span>}
               </Link>
             </li>
 
             <li>
-              <Link to="/page2" className="nav-link">
+              <Link to="/dashboard/page2" className="nav-link">
                 <FontAwesomeIcon icon={faFileLines} className="nav-icon" />
                 {!collapsed && <span className="nav-text">Document Library</span>}
               </Link>
             </li>
 
             <li>
-              <Link to="/page3" className="nav-link">
-                <FontAwesomeIcon icon={faGear} className="nav-icon" />
-                {!collapsed && <span className="nav-text">Page3</span>}
+              <Link to="/dashboard/page3" className="nav-link">
+                <FontAwesomeIcon icon={faClockRotateLeft} className="nav-icon" />
+                {!collapsed && <span className="nav-text">History</span>}
               </Link>
             </li>
+          </div>
 
-            <li>
-              <button onClick={handleLogout} type="button">
-                <FontAwesomeIcon icon={faRightFromBracket} className="nav-icon" />
-                {!collapsed && <span className="nav-text">Logout</span>}
-              </button>
-            </li>
-          </ul>
+          {!collapsed && (
+            <div className="bottom-section">
+              <div className="user-section">
+                <div className="user-card">
+                  <FontAwesomeIcon icon={faCircleUser} className="nav-icon" />
+
+                  <div className="user-info">
+                    <span className="user-name">{fullName}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="logout-icon-btn"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await handleLogout();
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faArrowRightFromBracket}
+                      className="logout-icon"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </nav>
       </aside>
 
       <main className={`main-content ${collapsed ? 'expanded' : ''}`}>
         <div className="content-wrapper">
           <Routes>
-            <Route path="/" element={<Page1 />} />
-            <Route path="/page2" element={<Page2 />} />
-            <Route path="/page3" element={<Page3 />} />
+            <Route index element={<Page1 />} />
+            <Route path="page2" element={<Page2 />} />
+            <Route path="page3" element={<Page3 />} />
           </Routes>
         </div>
       </main>
