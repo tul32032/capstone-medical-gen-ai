@@ -1,0 +1,24 @@
+[TAGS]
+Source: 12885_2015_Article_1620.pdf
+Page: 1
+Section: Abstract
+---
+Background: Normalization of cortisol concentration by multikinase inhibitors have been reported in three patients
+with medullary thyroid cancer-related Cushing’s syndrome. Aortic dissection has been reported in three patients
+with Cushing’s syndrome. Diabetes insipidus without intrasellar metastasis, intestinal intussusception, and paraneoplastic
+dysautonomia have not been reported in medullary thyroid cancer.
+Case presentation: An adult male with metastatic medullary thyroid cancer presented with hyperglycemia,
+hypernatremia, hypokalemia, hypertension, acne-like rash, and diabetes insipidus (urine volume >8 L/d, osmolality
+scan revealed jejunal intussusception and incidental abdominal aortic dissection. Sorafenib treatment was associated
+with Cushing’s syndrome remission, elevated progesterone (>10 fold), normalization of dehydroepiandrostenedione
+sulfate, but persistently elevated cortisol concentration. Newly-developed proximal lower limb weakness and decreased
+salivation were associated with elevated ganglionic neuronal acetylcholine receptor (alpha-3) and borderline P/Q type
+calcium channel antibodies.
+Conclusion: Extreme cortisol concentration may have contributed to aortic dissection and suppressed antidiuretic
+hormone secretion; which combined with hypokalemia due cortisol activation of mineralocorticoid receptors,
+manifested as diabetes insipidus. This is the first report of paraneoplastic dysautonomia and jejunal intussusception in
+medullary thyroid cancer, they may be related to medullary thyroid cancer’s neuroendocrine origin and metastasis,
+respectively. Remission of Cushing’s syndrome without measurable reduction in cortisol concentration suggests a
+novel cortisol-independent mechanism of action or assay cross-reactivity. Normalization of dehydroepiandrostenedione
+sulfate and elevation of progesterone suggest inhibition of 17-hydroxylase and 21-hydroxylase activities by sorafenib.
+2Departments of Clinical Studies and Empirical Ethics, King Faisal Specialist

@@ -1,0 +1,83 @@
+[TAGS]
+Source: 12885_2015_Article_1620.pdf
+Page: 6
+Section: DHEAS
+---
+and
+elevation
+in
+progesterone,
+suggesting a direct adrenal action of sorafenib, namely,
+21-hydroxylase and 17-hydroxylase inhibition. Proges-
+terone exhibits the same affinity as aldosterone for the
+human mineralocorticoid receptor, acting as antagonist
+[16]. It has antagonistic activity at the glucocorticoid
+receptor especially with reduced receptors number [17].
+Despite >10 fold increase, progesterone would not ef-
+fectively compete with prevailing cortisol in our patient,
+since both are equally protein-bound [16]. Neverthe-
+less, we could not exclude a role of progesterone in CS
+remission because of the possibility of spuriously high
+cortisol concentration. For example, 21-deoxycortisol,
+which is elevated by 21-hydroxylase inhibition, had
+45 % cross-reactivity in our cortisol immunoassay [18].
+Further, cortisol concentration was increased 7.8 fold
+over upper normal limit in our immunoassay compared
+to 4.6 fold in another immunoassay. Much to our regret,
+we did not measure cortisol concentration by a more spe-
+cific liquid chromatography assay or 21-deoxycortisol con-
+centration. Finally, sorafenib was shown to down regulate
+wild type and c-terminally truncated (lacking ligand bind-
+ing domain) androgen receptors in prostate cancer cells
+and to inhibit their signaling [19]. We postulate a similar
+action of sorafenib on mineralocorticoid and glucocortic-
+oid receptors in our patient. It is of note that insulin-
+independent hypoglycemia was induced by sorafenib in a
+patient with hemangiopericytoma and was responsive to
+glucocorticoid treatment [20].
+Aortic dissection has been reported in 3 men with CS,
+two with adrenal adenoma and one with pituitary aden-
+oma; all three presented with dissection-related symptoms
+[11]. In our patient, aortic dissection was discovered acci-
+dently. The prevalence of silent aortic dissection in CS is
+not known as most cases of CS are due to exogenous
+Hammami et al. BMC Cancer  (2015) 15:624
+Page 6 of 8
+
+glucocorticoids or Cushing’s disease and abdominal im-
+aging is not performed. A causal relationship between ele-
+vated cortisol and aortic dissection can be postulated;
+cortisol could increase blood vessels fragility through
+negative effects on collagen formation and connective tis-
+sue strength. Acute elevation in blood pressure is another
+potentially contributing factor.
+Intestinal intussusception in adults is rare accounting
+for 5 % of all intussusceptions; most cases are secondary
+to lead lesions requiring surgical intervention; and pre-
+senting symptoms are usually chronic and nonspecific
+[12]. To the best of our knowledge, intestinal intussus-
+ception has not been reported in MTC, nor has intes-
+tinal metastasis. We postulate that the intussusception
+was the cause of the intermittent abdominal pain in our
+patient and that it was likely due to metastasis, however,
+functional intussusception cannot be excluded as a mass
+was not visualized.
+Lambert-Eaton syndrome (LES), a rare neuromuscular
+transmission disorder, characterized by proximal muscle
+weakness, depressed deep tendon reflexes, post-tetanic
+potentiation, and autonomic dysfunction, is caused by
+autoimmunity against P/Q voltage-gated calcium chan-
+cell lung cancer but has not been reported in MTC [22].
+Our patient presented with normal power despite having
+profound hypokalemia and hypercortisolemia, started to
+have mild weakness 20 days later when hypokalemia was
+corrected, and his weakness rapidly progressed to the
+degree that he became bed-bound despite mifepristone
+treatment. Electrolytes and TSH were normal. 25- Hydro-
+xyvitamin D concentration was low, however, this was likely
+due to low binding proteins since PTH and corrected
+min D daily. Absence of deep tendon reflexes, markedly
+decreased salivation, and postural tachycardia suggested
+LES and autoimmune dysautonomia. We could not con-
+firm LES diagnosis since repetitive stimulation testing was
+negative and P/Q voltage-gated calcium channel antibodies

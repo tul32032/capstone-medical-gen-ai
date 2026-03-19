@@ -1,0 +1,40 @@
+[TAGS]
+Source: 12020_2022_Article_3220.pdf
+Page: 4
+Section: Results
+---
+Percentages shown are relative to the total number in that group. Postoperative medications refers to those administered in the first postoperative week ACE angiotensin converting enzyme, ARB angiotensin receptor blocker, SSRI selective serotonin reuptake inhibitor, SNRI serotonin and noradrenaline reuptake inhibitor Bold values indicates statistically significant values (p < 0.05).
+
+The ROC curves are shown in Fig. 2. The best predictive value is observed at day 1 (AUC = 0.74) and day 8 (AUC = 0.80), while predictive value is also seen at 6 weeks. There is no significant predictive value pre-operatively, while the AUC at day 2 does not differ significantly from equivalence due to the outlier result. Interestingly, there was no significant
+
+Table 3 Copeptin levels are measured time points
+
++------------------+-----------------+-----------------+---------+
+| Time             | Copeptin—no DI  | Copeptin—DI     | p value |
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
++------------------+-----------------+-----------------+---------+
+
+Copeptin values for non-DI and DI groups at the various sampling time points, with associated p values. Median values are shown with ranges and interquartile range (IQR) in brackets. All values are in pmol/l
+
+TSA trans-sphenoidal adenomectomy
+
+Bold values indicates statistically significant values (p < 0.05).
+
+[FIGURE_CAPTION] Comparison of copeptin results pre-operatively and at day 1, day 2, day 8 and week 6 between patients who developed DI (DI, in green) and those who did not (no DI, in red). Circles represent individual values, while horizontal lines represent the median values (thick line) and interquartile range (thin lines). A dashed line highlighting the proposed day 1 cut-off value of 3.4 mol/l is shown
+
+A comparison of the median results in DI and non-DI results at the various time points can be seen in Fig. 1. In patients who do not develop DI, a post-surgical rise in copeptin levels is observed, falling by the 6 week time point. By contrast, the median copeptin level in the DI group falls post-operatively and remains low at subsequent checks. However, analysis of patients with samples collected at all five observation time points using the Friedman test shows no significant difference between time points in
+
+[FIGURE_CAPTION] Receiver-operative characteristic (ROC) curves for copeptin pre-operatively (a) and at day 1 (b), day 2 (c), day 8 (d) and week 6 (e). Curves have been generated using the Wilson/Brown method and are shown in black. Area under curve (AUC) and p value also shown
+
+When the DI group is separated into permanent versus transient DI, there is a tendency for the permanent DI group to have lower copeptin levels from day 2 onwards , but the small numbers in the groups mean that no significant difference is demonstrated.
+
+It is notable that copeptin results were higher preoperatively and at day 1 post-TSS in those with an eGFR <30 ml/min/1.73 m[2] (pre-operative mean 7.79 pmol/l, day 1 mean 17.95 pmol/l) and heart failure (pre-operative mean 15.14 pmol/l, day 1 mean 13.4 pmol/l). No patients with low eGFR, heart failure or type 2 diabetes developed DI.

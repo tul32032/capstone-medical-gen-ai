@@ -1,0 +1,12 @@
+[TAGS]
+Source: 12020_2022_Article_3220.pdf
+Page: 1
+Section: Introduction
+---
+Central diabetes insipidus (DI) following pituitary surgery is a well-recognised complication, often occurring early and transiently post-operatively with incidence variably
+
+documented as ranging from 1 to 67% [1]. Such postoperative DI is associated with increased morbidity and a greater length of hospital stay [2] and accurate diagnosis is essential to allow early treatment. Currently this relies upon a combination of clinical assessment, fluid balance monitoring, and plasma and urine sampling for sodium and osmolality analysis [3].
+
+Efficient diagnosis of DI is limited by the challenge of directly assaying arginine vasopressin (AVP), which has a short half-life in vivo [4], is unstable ex vivo even when frozen [5], and is affected by delayed or incomplete separation from platelets [6]. As a result, there are no AVP assays available in clinical laboratories in the United Kingdom. Copeptin is the 39 amino acid C-terminal segment of pre-pro-AVP, and is produced in isomolar quantities to AVP [7]. It can be measured using commercially available immunoassay methods, and has the major advantage of being much more stable than AVP in blood
+
+after venesection. Copeptin has been demonstrated to add diagnostic accuracy in the investigation of polyuriapolydipsia syndrome [8, 9], and Winzeler et al. showed that patients with DI after pituitary surgery had a lower copeptin level than those who did not develop DI [10]. The aims of our study were to determine the predictive value of copeptin in diagnosing DI after trans-sphenoidal surgery (TSS) in our centre, to assess its utility in routine clinical practice, and to explore using a discriminative ‘cutoff’ to facilitate earlier discharge.

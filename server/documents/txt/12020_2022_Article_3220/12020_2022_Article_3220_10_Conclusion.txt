@@ -1,0 +1,14 @@
+[TAGS]
+Source: 12020_2022_Article_3220.pdf
+Page: 6
+Section: Conclusion
+---
+We confirm that post-pituitary surgery copeptin measurement is useful to exclude DI early post-operatively and propose it as a potential tool to identify patients suitable for early discharge. It will be important to conduct future work on earlier sampling times, with real-time assay, and combine these results with other clinical and biochemical parameters to provide a robust dataset at 24 h
+
+post-pituitary surgery enabling selection of patients for safe early discharge.
+
+Author contributions All authors contributed to study conception and design. Material preparation, data collection and analysis were performed by H.R., S.N., B.S. and A.P. The first draft of the manuscript was written by H.R. and all authors commented on previous versions of the manuscript. All authors approved the final manuscript.
+
+Compliance with ethical standards
+
+Conflict of interest The authors declare no competing interests.
