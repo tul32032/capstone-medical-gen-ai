@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./LoginPage";
 import Dashboard from "./Dashboard";
 import GoogleCallback from "./GoogleCallback";
@@ -11,12 +11,13 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<GoogleCallback />} />
 
           <Route element={<ProtectedRoutes />}>
-            <Route path="/*" element={<Dashboard />} />
+            <Route path="/dashboard/*" element={<Dashboard />} />
           </Route>
 
-          <Route path="/auth/callback" element={<GoogleCallback />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
