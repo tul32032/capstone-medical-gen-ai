@@ -83,26 +83,19 @@ WSGI_APPLICATION = 'betesbot.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-if DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-        }
+# DEBUG=1 uses local docker-compose postgres, DEBUG=0 uses deployed postgres instance
+DATABASES = {
+    'default': {
+         'ENGINE': 'django.db.backends.{}'.format(
+             os.getenv('DATABASE_ENGINE', 'postgresql')
+         ),
+         'NAME': os.getenv('DATABASE_NAME', 'postgres'),
+         'USER': os.getenv('DATABASE_USERNAME', 'postgres'),
+         'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
+         'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+         'PORT': os.getenv('DATABASE_PORT', 5432),
     }
-else:
-    DATABASES = {
-        'default': {
-             'ENGINE': 'django.db.backends.{}'.format(
-                 os.getenv('DATABASE_ENGINE', 'postgresql')
-             ),
-             'NAME': os.getenv('DATABASE_NAME', 'postgres'),
-             'USER': os.getenv('DATABASE_USERNAME', 'postgres'),
-             'PASSWORD': os.getenv('DATABASE_PASSWORD', 'postgres'),
-             'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
-             'PORT': os.getenv('DATABASE_PORT', 5432),
-        }
-    }
+}
 
 
 # Password validation
@@ -143,7 +136,7 @@ STATIC_URL = 'static/'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'https://capstone-medical-gen-ai-fe-524283018158.us-central1.run.app'
+    'https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app'
 ]
 CORS_ALLOW_CREDENTIALS = True
 
