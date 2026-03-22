@@ -30,6 +30,22 @@ const Page1 = () => {
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const saveChatToHistory = (prompt: string, reply: string) => {
+    const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
+
+    const newChat = {
+      id: Date.now(),
+      prompt,
+      reply,
+      createdAt: new Date().toLocaleString(),
+    };
+
+    localStorage.setItem(
+      "betesbot_history",
+      JSON.stringify([newChat, ...existing])
+    );
+  };
+
   const handleSend = async (customMessage?: string) => {
     const finalMessage = customMessage ?? message;
 
@@ -37,12 +53,18 @@ const Page1 = () => {
 
     setLoading(true);
     setResponse("");
+
     try {
       const res = await fetch(`${API_BASE_URL}/api/chat/?message=${encodeURIComponent(finalMessage)}`);
       const data = await res.json();
-      setResponse(JSON.stringify(data, null, 2));
+      const formattedResponse = JSON.stringify(data, null, 2);
+
+      setResponse(formattedResponse);
+      saveChatToHistory(finalMessage, formattedResponse);
     } catch (err) {
-      setResponse("Error: " + (err as Error).message);
+      const errorMessage = "Error: " + (err as Error).message;
+      setResponse(errorMessage);
+      saveChatToHistory(finalMessage, errorMessage);
     } finally {
       setLoading(false);
       setMessage("");
