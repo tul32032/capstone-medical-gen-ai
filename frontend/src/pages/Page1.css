@@ -73,8 +73,38 @@ body {
   font-size:16px;
   color:#25313d;
   text-align:left;
-  white-space:pre-wrap;
   word-break:break-word;
+}
+
+.response-answer {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.citations {
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.citations-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+}
+
+.citations-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #4770c1;
 }
 .quick-actions {
   width: 880px;
