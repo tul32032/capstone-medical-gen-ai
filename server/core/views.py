@@ -1,15 +1,60 @@
+import os
 import requests
 from django.http import JsonResponse
 from django.views import View
 
-BASE = "http://10.0.1.5/"
+AI_INFRA_BASE_URL = "http://10.0.1.5"
+API_KEY = os.environ.get("AI_INFRA_API_KEY", "")
+PROJECT_ID = os.environ.get("AI_INFRA_PROJECT_ID", "")
+
+SYSTEM_PROMPT = (
+    "You are a endocrinologist with a specialization in diabetes. Your goal is to provide "
+    "evidence-based information regarding diabetes as well as diabetes management. Every single "
+    "claim must end with a citation in brackets like [Source: DocName, Page #]. If the source is "
+    "not in the context, say 'I do not know'.\n\nResponse Structure:\nA brief 1-2 sentence answer.\n"
+    "A more detailed explanation giving insights derived from the retrieved context.\n"
+    'A "References" section at the bottom.\n\nSafety and Constraints:\nYou cannot prescribe '
+    "specific dosages for medications. You may discuss standard ranges but must direct the user to "
+    "their healthcare provider.\nBe professional and clear, avoid overly dense medical jargon unless "
+    "explaining it.\nStrictly limit your answer to the provided context. Do not use outside knowledge."
+)
 
 
 class ChatProxyView(View):
-    def get(self, request):
-        params = request.GET.dict()
+    def post(self, request):
+        import json
+
         try:
-            response = requests.get(BASE, params=params, timeout=30)
-            return JsonResponse(response.json(), status=response.status_code)
+            body = json.loads(request.body)
+        except (json.JSONDecodeError, ValueError):
+            return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
+        message = body.get("message")
+        if not message:
+            return JsonResponse(
+                {"error": "Missing required field: message"}, status=400
+            )
+
+        try:
+            response = requests.post(
+                f"{AI_INFRA_BASE_URL}/api/v1/chat",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "question": message,
+                    "project_id": PROJECT_ID,
+                    "system_prompt": SYSTEM_PROMPT,
+                },
+            )
+            data = response.json()
+            return JsonResponse(
+                {
+                    "answer": data.get("answer", ""),
+                    "citations": data.get("citations", []),
+                },
+                status=response.status_code,
+            )
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)

@@ -27,7 +27,8 @@ const quickPrompts = [
 
 const Page1 = () => {
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [citations, setCitations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const saveChatToHistory = (prompt: string, reply: string) => {
@@ -52,18 +53,23 @@ const Page1 = () => {
     if (!finalMessage.trim()) return;
 
     setLoading(true);
-    setResponse("");
+    setAnswer("");
+    setCitations([]);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/chat/?message=${encodeURIComponent(finalMessage)}`);
+      const res = await fetch(`${API_BASE_URL}/api/chat/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: finalMessage }),
+      });
       const data = await res.json();
-      const formattedResponse = JSON.stringify(data, null, 2);
 
-      setResponse(formattedResponse);
-      saveChatToHistory(finalMessage, formattedResponse);
+      setAnswer(data.answer ?? "");
+      setCitations(data.citations ?? []);
+      saveChatToHistory(finalMessage, data.answer ?? "");
     } catch (err) {
       const errorMessage = "Error: " + (err as Error).message;
-      setResponse(errorMessage);
+      setAnswer(errorMessage);
       saveChatToHistory(finalMessage, errorMessage);
     } finally {
       setLoading(false);
@@ -112,9 +118,19 @@ const Page1 = () => {
         </button>
       </div>
 
-      {response && (
+      {answer && (
         <div className="response-container">
-          <pre>{response}</pre>
+          <p className="response-answer">{answer}</p>
+          {citations.length > 0 && (
+            <div className="citations">
+              <h3 className="citations-title">References</h3>
+              <ul className="citations-list">
+                {citations.map((cite, i) => (
+                  <li key={i}>{cite}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
