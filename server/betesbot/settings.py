@@ -134,12 +134,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app',
-    'https://capstone-medical-gen-ai-server-524283018158.us-east1.run.app'
-]
-
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
