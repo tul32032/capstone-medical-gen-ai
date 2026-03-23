@@ -72,7 +72,7 @@ class UploadFile(View):
 
         try:
             response = requests.post(
-                f"{AI_INFRA_BASE_URL}/ingest/{PROJECT_ID}",
+                f"{AI_INFRA_BASE_URL}/ingest/{PROJECT_ID}/upload",
                 headers={
                     "Authorization": f"Bearer {API_KEY}",
                 },
