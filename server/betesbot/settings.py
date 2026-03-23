@@ -140,6 +140,11 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:3000,https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app"
+).split(",")
+
 AUTH_USER_MODEL = 'authentication.User'
 
 REST_FRAMEWORK = {
