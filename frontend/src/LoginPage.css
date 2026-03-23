@@ -199,6 +199,19 @@ input:focus {
   text-decoration: underline;
 }
 
+.rowHalf {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+}
+
 .footerText {
   text-align: center;
   color: var(--muted);
