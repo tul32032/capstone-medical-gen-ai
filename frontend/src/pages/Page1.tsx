@@ -28,7 +28,8 @@ const quickPrompts = [
 const Page1 = () => {
   const [message, setMessage] = useState("");
   const [answer, setAnswer] = useState("");
-  const [citations, setCitations] = useState<string[]>([]);
+  type Citation = { source?: string; content?: string; url?: string; score?: number } | string;
+  const [citations, setCitations] = useState<Citation[]>([]);
   const [loading, setLoading] = useState(false);
 
   const saveChatToHistory = (prompt: string, reply: string) => {
@@ -126,7 +127,13 @@ const Page1 = () => {
               <h3 className="citations-title">References</h3>
               <ul className="citations-list">
                 {citations.map((cite, i) => (
-                  <li key={i}>{cite}</li>
+                  <li key={i}>
+                    {typeof cite === "string"
+                      ? cite
+                      : cite.url
+                      ? <a href={cite.url} target="_blank" rel="noopener noreferrer">{cite.source ?? cite.url}</a>
+                      : cite.source ?? JSON.stringify(cite)}
+                  </li>
                 ))}
               </ul>
             </div>

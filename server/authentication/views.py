@@ -53,7 +53,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             max_age=ACCESS_TOKEN_MAX_AGE,
             httponly=True,
             secure=not settings.DEBUG,
-            samesite='Lax',
+            samesite='None',
         )
         return response
 
@@ -100,7 +100,7 @@ class EmailSignupApi(PublicApiMixin, ApiErrorsMixin, APIView):
             max_age=ACCESS_TOKEN_MAX_AGE,
             httponly=True,
             secure=not settings.DEBUG,
-            samesite='Lax',
+            samesite='None',
         )
         return response
 
@@ -133,7 +133,7 @@ class EmailLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             max_age=ACCESS_TOKEN_MAX_AGE,
             httponly=True,
             secure=not settings.DEBUG,
-            samesite='Lax',
+            samesite='None',
         )
         return response
 
