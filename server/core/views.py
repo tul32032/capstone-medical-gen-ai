@@ -2,6 +2,8 @@ import os
 import requests
 from django.http import JsonResponse
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 AI_INFRA_BASE_URL = "http://10.0.1.5"
 API_KEY = os.environ.get("AI_INFRA_API_KEY", "")
@@ -20,6 +22,7 @@ SYSTEM_PROMPT = (
 )
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class ChatProxyView(View):
     def post(self, request):
         import json
@@ -56,5 +59,25 @@ class ChatProxyView(View):
                 },
                 status=response.status_code,
             )
+        except requests.exceptions.RequestException as e:
+            return JsonResponse({"error": str(e)}, status=502)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class UploadFile(View):
+    def post(self, request):
+        file = request.FILES.get("file")
+        if not file:
+            return JsonResponse({"error": "Missing required field: file"}, status=400)
+
+        try:
+            response = requests.post(
+                f"{AI_INFRA_BASE_URL}/ingest/{PROJECT_ID}",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                },
+                files={"file": (file.name, file, file.content_type)},
+            )
+            return JsonResponse(response.json(), status=response.status_code)
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)
