@@ -136,14 +136,22 @@ STATIC_URL = 'static/'
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
-    'https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app'
+    'https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app',
+    'https://capstone-medical-gen-ai-server-524283018158.us-east1.run.app'
 ]
+
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "CSRF_TRUSTED_ORIGINS",
-    "http://localhost:3000,https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app"
-).split(",")
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app',
+    'https://capstone-medical-gen-ai-server-524283018158.us-east1.run.app'
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SAMESITE = "None"
 
 AUTH_USER_MODEL = 'authentication.User'
 
