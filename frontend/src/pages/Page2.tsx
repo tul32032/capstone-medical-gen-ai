@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { API_BASE_URL } from "../constants/constants";
 import "./Page2.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
 
 type UploadedDoc = {
   id: string;
@@ -100,7 +102,7 @@ const Page2 = () => {
       </div>
 
       <div className="file-grid">
-        {uploadedFiles.length === 0 ? (
+        {files.length === 0 ? (
           <p className="empty-text">No documents uploaded yet.</p>
         ) : (
           files.map((file) => (
