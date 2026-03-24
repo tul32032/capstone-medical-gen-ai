@@ -1,65 +1,83 @@
 import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileLines, faUpload, faCircleCheck, faCircleXmark, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { API_BASE_URL } from "../constants/constants";
 import "./Page2.css";
 
-type UploadedFile = {
+type UploadedDoc = {
+  id: string;
   name: string;
   status: "uploading" | "success" | "error";
-  errorMsg?: string;
+  chunkCount?: number;
+  error?: string;
 };
 
 const Page2 = () => {
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [files, setFiles] = useState<UploadedDoc[]>([]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
     const selectedFiles = Array.from(e.target.files);
-    e.target.value = "";
 
-    for (const file of selectedFiles) {
-      setUploadedFiles((prev) => [...prev, { name: file.name, status: "uploading" }]);
+    for (const selectedFile of selectedFiles) {
+      const uploadId = `${selectedFile.name}-${selectedFile.size}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-      const formData = new FormData();
-      formData.append("file", file);
+      setFiles((prev) => [
+        ...prev,
+        {
+          id: uploadId,
+          name: selectedFile.name,
+          status: "uploading",
+        },
+      ]);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/upload/`, {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        const response = await fetch(`${API_BASE_URL}/documents/upload/`, {
           method: "POST",
           credentials: "include",
           body: formData,
         });
 
-        if (response.ok) {
-          setUploadedFiles((prev) =>
-            prev.map((f) =>
-              f.name === file.name && f.status === "uploading"
-                ? { ...f, status: "success" }
-                : f
-            )
-          );
-        } else {
-          const data = await response.json().catch(() => ({}));
-          setUploadedFiles((prev) =>
-            prev.map((f) =>
-              f.name === file.name && f.status === "uploading"
-                ? { ...f, status: "error", errorMsg: data.error ?? "Upload failed" }
-                : f
-            )
-          );
+        const contentType = response.headers.get("content-type") || "";
+        const data = contentType.includes("application/json")
+          ? await response.json()
+          : { error: await response.text() };
+
+        if (!response.ok) {
+          throw new Error(data.error || data.detail || "Upload failed.");
         }
-      } catch {
-        setUploadedFiles((prev) =>
-          prev.map((f) =>
-            f.name === file.name && f.status === "uploading"
-              ? { ...f, status: "error", errorMsg: "Network error" }
-              : f
+
+        setFiles((prev) =>
+          prev.map((file) =>
+            file.id === uploadId
+              ? {
+                  ...file,
+                  status: "success",
+                  chunkCount: data.chunk_count ?? 0,
+                }
+              : file
+          )
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Upload failed.";
+
+        setFiles((prev) =>
+          prev.map((file) =>
+            file.id === uploadId
+              ? {
+                  ...file,
+                  status: "error",
+                  error: message,
+                }
+              : file
           )
         );
       }
     }
+
+    e.target.value = "";
   };
 
   return (
@@ -75,6 +93,7 @@ const Page2 = () => {
           id="fileUpload"
           type="file"
           multiple
+          accept=".pdf"
           onChange={handleFileChange}
           className="file-input"
         />
@@ -84,24 +103,14 @@ const Page2 = () => {
         {uploadedFiles.length === 0 ? (
           <p className="empty-text">No documents uploaded yet.</p>
         ) : (
-          uploadedFiles.map((file, index) => (
-            <div key={index} className={`file-card file-card--${file.status}`}>
-              <FontAwesomeIcon icon={faFileLines} className="file-card__icon" />
-              <p className="file-card__name">{file.name}</p>
-              <div className="file-card__status">
-                {file.status === "uploading" && (
-                  <FontAwesomeIcon icon={faSpinner} spin className="status-icon status-icon--uploading" />
-                )}
-                {file.status === "success" && (
-                  <FontAwesomeIcon icon={faCircleCheck} className="status-icon status-icon--success" />
-                )}
-                {file.status === "error" && (
-                  <>
-                    <FontAwesomeIcon icon={faCircleXmark} className="status-icon status-icon--error" />
-                    {file.errorMsg && <span className="status-error-msg">{file.errorMsg}</span>}
-                  </>
-                )}
-              </div>
+          files.map((file) => (
+            <div key={file.id} className="file-card">
+              <p>{file.name}</p>
+              <p>Status: {file.status}</p>
+              {file.status === "success" && (
+                <p>Chunks created: {file.chunkCount ?? 0}</p>
+              )}
+              {file.status === "error" && <p>Error: {file.error}</p>}
             </div>
           ))
         )}
