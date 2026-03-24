@@ -86,6 +86,7 @@ const Page2 = () => {
 
       <div className="upload-section">
         <label htmlFor="fileUpload" className="upload-box">
+          <FontAwesomeIcon icon={faUpload} className="upload-icon" />
           Click here to upload files
         </label>
         <input
@@ -99,7 +100,7 @@ const Page2 = () => {
       </div>
 
       <div className="file-grid">
-        {files.length === 0 ? (
+        {uploadedFiles.length === 0 ? (
           <p className="empty-text">No documents uploaded yet.</p>
         ) : (
           files.map((file) => (

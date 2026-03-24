@@ -1,6 +1,6 @@
 .page-title {
-  font-size: 48px;
-  font-weight: 500;
+  font-size: 40px;
+  font-weight: 300;
   font-family:Arial, Helvetica, sans-serif;
   /*color: rgb(71,112,193);*/
   color: rgb(37, 49, 61);
@@ -11,6 +11,11 @@
   flex-direction:column;
   align-items:center;
   gap:30px;
+}
+body {
+  margin: 0;
+  background: #f2faff;
+  background: linear-gradient(90deg,rgb(248, 252, 255) 22%, rgba(255, 255, 255, 1) 49%, rgba(242, 250, 255, 1) 100%);
 }
 .chat-input-container{
   display:flex;
@@ -68,6 +73,79 @@
   font-size:16px;
   color:#25313d;
   text-align:left;
-  white-space:pre-wrap;
   word-break:break-word;
+}
+
+.response-answer {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.citations {
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.citations-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+}
+
+.citations-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #4770c1;
+}
+.quick-actions {
+  width: 880px;
+  max-width: 90%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.quick-action-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 18px;
+  padding: 20px 22px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.quick-action-card:hover {
+  border-color: #c7d2e8;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.quick-action-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.quick-action-title {
+  font-size: 18px;
+  font-weight: 493;
+  color: rgb(37, 49, 61);
+}
+
+.quick-action-description {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #6b7280;
 }
