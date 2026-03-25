@@ -37,7 +37,7 @@ const Page2 = () => {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        const response = await fetch(`${API_BASE_URL}/documents/upload/`, {
+        const response = await fetch(`${API_BASE_URL}/api/upload/`, {
           method: "POST",
           credentials: "include",
           body: formData,
