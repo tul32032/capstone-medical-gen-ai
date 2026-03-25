@@ -8,11 +8,8 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
-    tesseract-ocr \
-    tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
-ENV TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
 
 RUN pip install uv
 
