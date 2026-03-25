@@ -1,355 +1,496 @@
 import re
-from typing import List
+from typing import List, Pattern
+
+REF_HEADERS: List[Pattern[str]] = [
+    re.compile(r"^\s*references\s*$", re.IGNORECASE),
+    re.compile(r"^\s*\*\*references\*\*\s*$", re.IGNORECASE),
+    re.compile(r"^\s*_?\*\*references\*\*_?\s*$", re.IGNORECASE),
+    re.compile(r"^\s*bibliography\s*$", re.IGNORECASE),
+    re.compile(r"^\s*works\s+cited\s*$", re.IGNORECASE),
+    re.compile(r"^\s*literature\s+cited\s*$", re.IGNORECASE),
+    re.compile(r"^\s*reference\s+list\s*$", re.IGNORECASE),
+    re.compile(r"^\s*cited\s+literature\s*$", re.IGNORECASE),
+]
+
+END_HEADER = re.compile(
+    r"^\s*(acknowledg(e)?ments?|author\s+contributions?|funding|"
+    r"abbreviations?|list\s+of\s+abbreviations?|glossary|"
+    r"availability\s+of\s+data(\s+and\s+material(s)?)?|data\s+availability|"
+    r"code\s+availability|declarations?|conflicts?\s+of\s+interest|"
+    r"competing\s+interests?|ethics\s+approval|consent\s+to\s+participate|"
+    r"consent\s+for\s+publication|patient\s+consent|open\s+access|"
+    r"creative\s+commons|publisher'?s\s+note|"
+    r"supplementary\s+(material|information)|supplemental\s+(material|information)|"
+    r"appendix|annex)\s*$",
+    re.IGNORECASE,
+)
+
+LICENSE_TEXT = (
+    "creative commons",
+    "the internal medicine is an open access article",
+    "naika.or.jp",
+    "by-nc-nd/4.0",
+)
+
+HEADER_JUNK = (
+    "intern med",
+    "received for publication",
+    "accepted for publication",
+    "correspondence to",
+    "japanese society of internal medicine",
+    "correspondence:",
+    "email:",
+    "e-mail:",
+    "these authors contributed equally",
+    "frontiers in",
+    "frontiersin.org",
+    "pubmed",
+    "pmc",
+    "pmcid",
+    "nihms",
+    "advance access publication",
+)
+
+CONTINUATION_WORDS = "in which|and|but|or|so|yet|because|while|whereas|although|however"
+
+PAGE_MARKER = re.compile(r"<!--\s*page:\s*\d+\s*-->", re.IGNORECASE)
+
+DROP_LINE_PATTERNS: List[Pattern[str]] = [
+    re.compile(r"^\s*\*\*correspondence:.*$", re.IGNORECASE),
+    re.compile(r"^\s*\[email:.*$", re.IGNORECASE),
+    re.compile(r"^\s*.*mailto:.*$", re.IGNORECASE),
+    re.compile(r"^\s*these authors contributed equally.*$", re.IGNORECASE),
+    re.compile(r"^\s*this article is part of the topical collection.*$", re.IGNORECASE),
+    re.compile(r"^\s*keywords\b.*$", re.IGNORECASE),
+    re.compile(r"^\s*-\s+[A-Z][A-Za-z .,&'\-]{2,}.*$"),
+    re.compile(r"^\s*\d+\s+Page\s+\d+\s+of\s+\d+.*$", re.IGNORECASE),
+    re.compile(r"^\s*School of Medicine,.*$", re.IGNORECASE),
+    re.compile(
+        r"^\s*\d+.*(?:university|hospital|department|school|institute|college|medical center).*$",
+        re.IGNORECASE,
+    ),
+    re.compile(r"^\s*\*\*[A-Z][^\n]*\*\*\s*(?:\*\*[^\n]+\*\*\s*){2,}$"),
+    re.compile(r"^\s*https?://\S+\s*$", re.IGNORECASE),
+    re.compile(r"^\s*\[https?://[^\]]+\]\([^)]+\)\s*$", re.IGNORECASE),
+    re.compile(r"^\s*frontiers in .*?$", re.IGNORECASE),
+    re.compile(r"^\s*.*frontiersin\.org.*$", re.IGNORECASE),
+    re.compile(r"^\s*[A-Z][A-Za-z .,&'\-]{2,}\bet al\.?\s*$"),
+    re.compile(r"^\s*copyright\s*$", re.IGNORECASE),
+    re.compile(r"^\s*published\s+online:.*$", re.IGNORECASE),
+    re.compile(r"^\s*received:?\s+.*$", re.IGNORECASE),
+    re.compile(r"^\s*accepted:?\s+.*$", re.IGNORECASE),
+    re.compile(r"^\s*editorial decision:?\s+.*$", re.IGNORECASE),
+    re.compile(r"^\s*corrected and typeset:?\s+.*$", re.IGNORECASE),
+    re.compile(r"^\s*curr diab rep.*$", re.IGNORECASE),
+    re.compile(r"^\s*doi[:\s].*$", re.IGNORECASE),
+    re.compile(r"^\s*.*section editor.*$", re.IGNORECASE),
+    re.compile(r"^\s*the author\(s\).*$", re.IGNORECASE),
+    re.compile(r"^\s*.*springerlink\.com.*$", re.IGNORECASE),
+    re.compile(r"^\*\*\(Intern.*?\)\*\*\s*$"),
+    re.compile(r"^\*\*\(DOI:.*?\)\*\*\s*$", re.IGNORECASE),
+    re.compile(r"^\*\*The\*\* \*\*authors\*\* .*?COI\)\.\s*$", re.IGNORECASE),
+]
+
+CITE_PATTERNS: List[Pattern[str]] = [
+    re.compile(r"\[(\d{1,3}(?:\s*[-,•*]\s*\d{1,3}|\s*[•*]+)*)\]"),
+    re.compile(r"\((\d{1,3}(?:\s*[-,•*]\s*\d{1,3}|\s*[•*]+)*)\)"),
+    re.compile(r"\[(\d{1,3}[•*]+(?:\s*[-,]\s*\d{1,3}[•*]+)*)\]"),
+]
 
 
 def normalize_text(text: str) -> str:
+    text = text.replace("\u00a0", " ")
+    text = text.replace("\ufeff", "")
     text = text.replace("\r\n", "\n").replace("\r", "\n")
-    text = re.sub(r"\n{3,}", "\n\n", text)
     text = "\n".join(line.rstrip() for line in text.split("\n"))
-    return text
+
+    if not text.strip():
+        return ""
+
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 
-def remove_consecutive_duplicate_paragraphs(text: str) -> str:
-    """Remove consecutive duplicate paragraphs (common PDF extraction artifact)."""
+def find_refs_start(text: str) -> int | None:
+    lines = text.split("\n")
+    for idx, line in enumerate(lines):
+        stripped = line.strip()
+        for pattern in REF_HEADERS:
+            if pattern.match(stripped):
+                return idx
+    return None
+
+
+def find_end_start(text: str) -> int | None:
+    lines = text.split("\n")
+    for idx, line in enumerate(lines):
+        if END_HEADER.match(line.strip()):
+            return idx
+    return None
+
+
+def find_numbered_refs_start(text: str) -> int | None:
+    lines = text.split("\n")
+
+    def looks_like_reference_entry(line: str) -> bool:
+        stripped = line.strip()
+        return bool(
+            re.match(r"^\d{1,3}[.)]\s+", stripped)
+            or re.match(r"^\[\d{1,3}\]\s+", stripped)
+            or re.match(
+                r"^[A-Z][A-Za-z'`.-]+(?:\s+[A-Z][A-Za-z'`.-]+){0,5},\s*(?:et al\.?|[A-Z])",
+                stripped,
+            )
+            or re.match(
+                r"^[A-Z][A-Za-z'`.-]+\s+[A-Z][A-Za-z'`.-]+.*\b(?:J\.|N Engl J Med|Lancet|BMJ|Radiology|Clin Endocrinol|Endocrinol|Horm Res|QJM)\b",
+                stripped,
+            )
+        )
+
+    for idx in range(len(lines)):
+        window = [ln.strip() for ln in lines[idx : idx + 10] if ln.strip()]
+        if len(window) < 3:
+            continue
+        hits = sum(1 for ln in window[:8] if looks_like_reference_entry(ln))
+        if hits >= 3:
+            return idx
+
+    return None
+
+
+def _merge_page_marker_mid_sentence(text: str) -> str:
+    return re.sub(
+        r"(?<=[a-z,;])\s*\n\s*(<!--\s*page:\s*\d+\s*-->)\s*\n\s*(?=[a-z])",
+        r" \1 ",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+
+def _drop_bad_replacement_chars(text: str) -> str:
+    return text.replace("�", "")
+
+
+def dedupe_paragraphs(text: str) -> str:
     t = normalize_text(text)
     paras = [p.strip() for p in t.split("\n\n")]
     out: List[str] = []
     prev: str | None = None
 
-    for p in paras:
-        if not p:
+    for paragraph in paras:
+        if not paragraph:
             continue
-        if prev is not None and p == prev:
+        if prev is not None and paragraph == prev:
             continue
-        out.append(p)
-        prev = p
+        out.append(paragraph)
+        prev = paragraph
 
     return "\n\n".join(out).strip() + "\n"
 
 
-def clean_chunk_text(text: str, *, remove_tables: bool) -> str:
-    """Extra cleaning: remove figure/image artifacts; optionally drop table-like blocks."""
-    t = text
-
-    # Normalize unicode non-breaking spaces and normalize newlines.
-    t = t.replace("\u00a0", " ")
-    t = normalize_text(t)
-
-    lines = t.split("\n")
-    out: List[str] = []
-
-    # Regexes for figure / image artifacts
-    fig_heading = re.compile(
-        r"^\s*(figure|fig\.?|image|photo|illustration|chart)\s*\d+\s*[:.-]?\s*.*$",
-        re.IGNORECASE,
-    )
-    fig_ref_inline = re.compile(
-        r"\((see\s+)?(figure|fig\.?|table)\s*\d+[^)]*\)",
-        re.IGNORECASE,
-    )
-    fig_only_line = re.compile(
-        r"^\s*(see\s+)?(figure|fig\.?|table)\s*\d+\s*(on\s+page\s*\d+)?\s*\.?\s*$",
-        re.IGNORECASE,
-    )
-
-    # A loose copyright / credit line often attached to images
-    credit_line = re.compile(
-        r"^\s*(copyright|\u00a9|reprinted\s+with\s+permission|source\s*:)\b.*$",
-        re.IGNORECASE,
-    )
-
-    # PyMuPDF-Layout picture placeholders
-    picture_placeholder = re.compile(
-        r"^\s*==>\s*picture\s*\[\s*\d+\s*x\s*\d+\s*\]\s*<==\s*$",
-        re.IGNORECASE,
-    )
-
-    # Some extractions include explicit picture-text blocks
-    picture_text_start = re.compile(
-        r"^\s*-{2,}\s*start\s+of\s+picture\s+text\s*-{2,}\s*$",
-        re.IGNORECASE,
-    )
-    picture_text_end = re.compile(
-        r"^\s*-{2,}\s*end\s+of\s+picture\s+text\s*-{2,}\s*$",
-        re.IGNORECASE,
-    )
-
-    # Common scholarly front-matter / boilerplate lines
-    doi_line = re.compile(r"\b(doi\s*:|doi\.org/|https?://\S+|www\.)\b", re.IGNORECASE)
-    received_line = re.compile(
-        r"^\s*(received|accepted|published\s+online|available\s+online|revised)\s*:\s*.*$",
-        re.IGNORECASE,
-    )
-    dates_inline = re.compile(r"\b(received|accepted|published\s+online)\b", re.IGNORECASE)
-    author_copyright = re.compile(
-        r"\b(the\s+author\(s\)|springer|elsevier|wiley|copyright|\u00a9)\b",
-        re.IGNORECASE,
-    )
-
-    # Front-matter banner and copyright/author list regexes
-    copyright_line2 = re.compile(
-        r"^\s*(?:©|\(c\))\s*.*$|^\s*the\s+author\(s\)\s+\d{4}\s*$",
-        re.IGNORECASE,
-    )
-
-    # Long author lists often contain many commas, affiliation markers, and correspondence symbols
-    author_list_line = re.compile(r"^(?=.{25,}).*(?:,|\u2709|\*|\[\d+\]|\d+){3,}.*$")
-
-    # Affiliations / contact / editorial / journal branding junk
-    email_line = re.compile(r"\bemail\s*:\s*\S+@\S+|\b\S+@\S+\b", re.IGNORECASE)
-    edited_by_line = re.compile(r"^\s*edited\s+by\b.*$", re.IGNORECASE)
-    official_journal_line = re.compile(r"^\s*official\s+journal\s+of\b.*$", re.IGNORECASE)
-    contributed_equally_line = re.compile(
-        r"^\s*(these\s+authors\s+contributed\s+equally|contributed\s+equally)\b.*$",
-        re.IGNORECASE,
-    )
-
-    # Affiliation lines often contain institution keywords and locations; remove near the top
-    affiliation_keywords = re.compile(
-        r"\b(univ(ersity)?|ins?erm|ephe|cnrs|department|laboratoire|laboratory|hospital|center|centre|"
-        r"montpellier|france|belgique|belgium|li[eè]ge|paris|london|berlin|usa|u\.s\.|uk)\b",
-        re.IGNORECASE,
-    )
-
-    # Running headers like "E.M. Richard et al." or "Hilson et al."
-    author_running_header = re.compile(
-        r"^\s*(?:[A-Z](?:\.[A-Z])?\.?\s*)?[A-Z][a-z]+\s+et\s+al\.?\s*$"
-    )
-
-    # Journal citation header-like lines
-    journal_citation = re.compile(
-        r"^\s*[A-Z][A-Za-z&()\-\u2013\u2014\s]{8,}\(\d{4}\)\s*[0-9]{1,4}[^A-Za-z]*[0-9]{1,6}.*$"
-    )
-
-    # Heuristic: table-like line
-    table_like = re.compile(r"(\t|\s{2,}).*(\t|\s{2,})")
-    sep_like = re.compile(r"^\s*[-_=]{3,}\s*$")
-
-    in_table_block = False
-    non_empty_seen = 0
-    in_picture_text = False
-    picture_text_lines_skipped = 0
-
-    for ln in lines:
-        s = ln.strip()
-        if s:
-            non_empty_seen += 1
-
-        # Remove leading Markdown quote marker for matching
-        ln_match = re.sub(r"^\s*>\s*", "", ln)
-        s_match = ln_match.strip()
-
-        # Skip explicit picture-text blocks
-        if picture_text_start.match(ln_match):
-            in_picture_text = True
-            picture_text_lines_skipped = 0
-            continue
-
-        if in_picture_text:
-            picture_text_lines_skipped += 1
-            if (
-                picture_text_end.match(ln_match)
-                or not s_match
-                or picture_text_lines_skipped >= 40
-            ):
-                in_picture_text = False
-            continue
-
-        # Drop common footer artifacts like "1 3"
-        if re.match(r"^\s*\d+\s+\d+\s*$", ln_match):
-            continue
-
-        # Drop standalone page numbers like "702"
-        if re.match(r"^\s*\d{1,4}\s*$", ln_match) and len(s_match) <= 4:
-            continue
-
-        # Hard-drop known repeating journal header line
-        if re.search(
-            r"\bArchives\s+of\s+Gynecology\s+and\s+Obstetrics\b",
-            ln_match,
-            flags=re.IGNORECASE,
-        ):
-            continue
-
-        # Drop editorial / journal branding / contact blocks near the top
-        if non_empty_seen <= 120:
-            if (
-                edited_by_line.match(ln_match)
-                or official_journal_line.match(ln_match)
-                or contributed_equally_line.match(ln_match)
-            ):
-                continue
-            if email_line.search(ln_match):
-                continue
-            if author_running_header.match(ln_match):
-                continue
-            if copyright_line2.match(ln_match):
-                continue
-            if author_list_line.match(ln_match):
-                continue
-
-            if affiliation_keywords.search(ln_match) and len(s_match) < 220:
-                if re.match(r"^\s*\d+\b", ln_match) or "," in ln_match or ";" in ln_match:
-                    continue
-
-        # Drop PyMuPDF-Layout picture placeholders
-        if picture_placeholder.match(ln_match):
-            continue
-
-        # Drop obvious OCR/image-gibberish lines
-        if s_match:
-            letters = sum(ch.isalpha() for ch in s_match)
-            alpha_ratio = letters / max(1, len(s_match))
-            if len(s_match) >= 25 and alpha_ratio < 0.25:
-                if re.search(r"\d", s_match) and re.search(r"[=*_\[\]{}<>|]", s_match):
-                    continue
-
-        # Drop DOI / URL lines
-        if doi_line.search(ln_match):
-            continue
-
-        # Drop common publication history lines
-        if received_line.match(ln_match) or dates_inline.search(ln_match):
-            if len(s_match) < 160:
-                continue
-
-        # Drop copyright/boilerplate lines
-        if author_copyright.search(ln_match) and len(s_match) < 160:
-            continue
-
-        # Drop journal citation header lines near the top only
-        if non_empty_seen <= 120 and journal_citation.match(ln_match) and len(s_match) < 220:
-            continue
-
-        # Keep figure captions, but strip the label
-        if fig_heading.match(ln_match):
-            cap = re.sub(
-                r"^\s*(figure|fig\.?|image|photo|illustration|chart)\s*\d+\s*[:.-]?\s*",
-                "",
-                ln_match,
-                flags=re.IGNORECASE,
-            ).strip()
-
-            if cap and not credit_line.match(cap) and len(cap) >= 8:
-                out.append(f"[FIGURE_CAPTION] {cap}")
-            continue
-
-        # Drop standalone refs and credit lines
-        if fig_only_line.match(ln_match) or credit_line.match(ln_match):
-            continue
-
-        # Remove inline references like "(see Fig. 2)"
-        ln = fig_ref_inline.sub("", ln_match)
-
-        if remove_tables:
-            is_tabley = bool(table_like.search(ln)) or ("|" in ln) or ("\t" in ln)
-            is_sep = bool(sep_like.match(ln))
-            if is_sep:
-                is_tabley = True
-
-            if is_tabley and s_match:
-                in_table_block = True
-                continue
-
-            if in_table_block:
-                in_table_block = False
-
-        out.append(ln.rstrip())
-
-    cleaned = "\n".join(out)
-    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
-    return cleaned.strip() + "\n"
-
-
-def find_bibliography_start_line_index(text: str) -> int | None:
-    """Return the line index where bibliography/references heading starts, else None."""
+def drop_matching_lines(text: str, patterns: List[Pattern[str]]) -> str:
     lines = text.split("\n")
-    pat = re.compile(
-        r"^\s*(references|bibliography|works\s+cited|literature\s+cited|"
-        r"reference\s+list|cited\s+literature)\s*$",
-        re.IGNORECASE,
+    kept_lines = [line for line in lines if not any(pattern.match(line) for pattern in patterns)]
+    return "\n".join(kept_lines)
+
+
+def drop_inline_citations(text: str) -> str:
+    for pattern in CITE_PATTERNS:
+        text = pattern.sub("", text)
+    return text
+
+def strip_heading_author(line: str) -> str:
+    if not line.lstrip().startswith("#"):
+        return line
+
+    cleaned = re.sub(
+        r"^(#{1,6}\s+.*?)(?:\s+[A-Z][A-Za-z'`.-]+(?:\s+[A-Z][A-Za-z'`.-]+){1,3})\s*$",
+        r"\1",
+        line.strip(),
     )
-    for idx, ln in enumerate(lines):
-        if pat.match(ln):
-            return idx
-    return None
+    return cleaned
 
+def drop_top_meta_line(
+    stripped: str,
+    lower: str,
+    *,
+    in_top_window: bool,
+    skipping_affiliations: bool,
+) -> bool:
+    if not in_top_window or not stripped:
+        return False
 
-def find_endmatter_start_line_index(text: str) -> int | None:
-    """Return the line index where common end-matter starts, else None."""
-    lines = text.split("\n")
-
-    pat = re.compile(
-        r"^\s*(acknowledg(e)?ments?|author\s+contributions?|funding|"
-        r"abbreviations?|list\s+of\s+abbreviations?|glossary|"
-        r"availability\s+of\s+data(\s+and\s+material(s)?)?|data\s+availability|"
-        r"code\s+availability|declarations?|conflicts?\s+of\s+interest|"
-        r"competing\s+interests?|ethics\s+approval|consent\s+to\s+participate|"
-        r"consent\s+for\s+publication|patient\s+consent|open\s+access|"
-        r"creative\s+commons|publisher'?s\s+note|"
-        r"supplementary\s+(material|information)|supplemental\s+(material|information)|"
-        r"appendix|annex)\s*$",
-        re.IGNORECASE,
-    )
-
-    for idx, ln in enumerate(lines):
-        if pat.match(ln.strip()):
-            return idx
-    return None
-
-
-def remove_author_lines_near_top(text: str) -> str:
-    """Heuristically remove author name lines near the top while keeping the title line."""
-    lines = text.split("\n")
-
-    title_idx = None
-    for i, ln in enumerate(lines):
-        if ln.strip():
-            title_idx = i
-            break
-
-    def looks_like_author_line(ln: str) -> bool:
-        s = ln.strip()
-        if not s:
-            return False
-        if re.match(r"^by\s+", s, flags=re.IGNORECASE):
-            return True
-
-        tokens = re.findall(r"[A-Za-z]+", s)
-        if not (2 <= len(tokens) <= 12):
-            return False
-
-        alpha_ratio = sum(ch.isalpha() for ch in s) / max(1, len(s))
-        if alpha_ratio < 0.55:
-            return False
-
-        has_commas = "," in s
-        has_and = re.search(r"\b(and|&)\b", s, flags=re.IGNORECASE) is not None
-        if not (has_commas or has_and):
-            return False
-
-        if re.search(
-            r"\b(university|department|school|college|email|@)\b",
-            s,
-            flags=re.IGNORECASE,
-        ):
-            return False
-
+    if lower.startswith(("correspondence:", "email:", "e-mail:")):
         return True
 
-    non_empty_seen = 0
-    for i, ln in enumerate(lines):
-        if ln.strip():
-            non_empty_seen += 1
-        if non_empty_seen > 40:
-            break
+    if "these authors contributed equally" in lower:
+        return True
 
-        if title_idx is not None and i == title_idx:
+    if "mailto:" in lower:
+        return True
+
+    if re.match(r"^\d+[A-Za-z].*", stripped):
+        return True
+
+    if re.match(r"^\d+[A-Za-z].*university|^\d+.*hospital|^\d+.*department", stripped, flags=re.IGNORECASE):
+        return True
+
+    if re.match(r"^[A-Z][A-Za-z'`.-]+(\s+[A-Z][A-Za-z'`.-]+){1,8}(\s*[,*&]\s*)?$", stripped):
+        return True
+
+    if re.match(r"^\*\*[^*]+\*\*(\s*\*\*[^*]+\*\*)+$", stripped):
+        return True
+
+    if skipping_affiliations and (
+        "university" in lower
+        or "hospital" in lower
+        or "department of" in lower
+        or "school of" in lower
+        or "institute of" in lower
+        or "college of" in lower
+        or "medical center" in lower
+        or "correspondence" in lower
+        or "@" in stripped
+    ):
+        return True
+
+    if stripped.startswith("Received:") or stripped.startswith("©"):
+        return True
+
+    if lower.startswith("published online:"):
+        return True
+
+    if lower.startswith("curr diab rep"):
+        return True
+
+    if lower.startswith("doi ") or lower.startswith("doi:"):
+        return True
+
+    if "section editor" in lower:
+        return True
+
+    if lower.startswith("the author(s)"):
+        return True
+
+    if "springerlink.com" in lower:
+        return True
+
+    return False
+
+
+def drop_top_author_block(text: str) -> str:
+    lines = text.split("\n")
+    cleaned: List[str] = []
+
+    top_window = min(len(lines), 40)
+    skipping_affiliations = True
+
+    for idx, line in enumerate(lines):
+        stripped = line.strip()
+        lower = stripped.lower()
+
+        if idx < top_window:
+            if not stripped:
+                continue
+
+            if PAGE_MARKER.fullmatch(stripped):
+                cleaned.append(stripped)
+                continue
+
+            if drop_top_meta_line(
+                stripped,
+                lower,
+                in_top_window=True,
+                skipping_affiliations=skipping_affiliations,
+            ):
+                continue
+
+        skipping_affiliations = False
+        cleaned.append(line)
+
+    cleaned_text = "\n".join(cleaned)
+    cleaned_text = re.sub(r"\n{3,}", "\n\n", cleaned_text)
+    return cleaned_text.strip() + "\n" if cleaned_text.strip() else ""
+
+
+def is_license_start(lower_line: str) -> bool:
+    return any(token in lower_line for token in LICENSE_TEXT)
+
+
+def is_header_junk(lower_line: str) -> bool:
+    return any(token in lower_line for token in HEADER_JUNK)
+
+
+def is_junk_line(stripped: str) -> bool:
+    if PAGE_MARKER.fullmatch(stripped):
+        return False
+
+    if re.fullmatch(r"https?://\S+", stripped, flags=re.IGNORECASE):
+        return True
+
+    if re.fullmatch(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", stripped):
+        return True
+
+    if re.fullmatch(r"[A-Z][A-Za-z .,&'-]{2,}\bet al\.?", stripped):
+        return True
+
+    return any(
+        (
+            stripped.isdigit(),
+            re.fullmatch(r"\d+(\.\d+)?", stripped) is not None,
+            re.fullmatch(r"[#*\-_\s]+", stripped) is not None,
+            re.fullmatch(r"#+\s*[A-Z]$", stripped) is not None,
+        )
+    )
+
+
+def repair_text(text: str) -> str:
+    text = _drop_bad_replacement_chars(text)
+    text = _merge_page_marker_mid_sentence(text)
+    text = re.sub(r"\bIgG\s*\n\s*4-related\b", "IgG4-related", text)
+    text = re.sub(r"\bIgG\s+4\b", "IgG4", text)
+    text = re.sub(r"\bre\s*\n\s*turned\b", "returned", text)
+    text = re.sub(r"\bpost\s*\n\s*obstructive\b", "post-obstructive", text)
+    text = re.sub(r"([A-Za-z])-\n([A-Za-z])", r"\1\2", text)
+    text = re.sub(r"\*\*([^*]+)\*\*\s+\*\*([^*]+)\*\*", r"**\1 \2**", text)
+    text = re.sub(
+        r"incidence rates of\s+of retroperitoneal fibrosis",
+        "incidence rates of retroperitoneal fibrosis",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"IgG4related", "IgG4-related", text)
+    text = re.sub(r"\b4-related\b", "IgG4-related", text)
+    text = re.sub(r"\bIG4\b", "IgG4", text)
+    text = re.sub(r"postobstructive", "post-obstructive", text, flags=re.IGNORECASE)
+    text = re.sub(r"IgG4RD", "IgG4-RD", text)
+    text = re.sub(r"(?<!\n\n)(?<=[a-z,;])\n(?=[a-zA-Z])", " ", text)
+    text = re.sub(rf"\n({CONTINUATION_WORDS})\b", r" \1", text)
+    text = re.sub(r"\s+(<!--\s*page:\s*\d+\s*-->)", r"\n\1", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"(<!--\s*page:\s*\d+\s*-->)\s+(?=#+\s|\*\*|[A-Z])",
+        r"\1\n\n",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"\*\*([^*]+)\*\*\s*\n\s*\*\*([^*]+)\*\*", r"**\1 \2**", text)
+    text = re.sub(r"([a-zA-Z])\n\s*(\d+-[a-zA-Z])", r"\1 \2", text)
+    text = re.sub(r"/\s+([a-z])", r"/ \1", text)
+    text = re.sub(r"\b[A-Z][A-Za-z .,&'\-]{2,}\bet al\.?\b", "", text)
+    text = re.sub(r"\[[^\]]*doi\.org/[^\]]*\]", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\[[^\]]*frontiersin\.org[^\]]*\]", "", text, flags=re.IGNORECASE)
+    return text
+
+
+def find_cutoff(text: str) -> int | None:
+    bib_idx = find_refs_start(text)
+    end_idx = find_end_start(text)
+    numbered_ref_idx = find_numbered_refs_start(text)
+
+    coi_match = re.search(
+        r"^\s*\*\*The\*\*\s+\*\*authors\*\*.*COI.*$",
+        text,
+        flags=re.IGNORECASE | re.MULTILINE,
+    )
+    references_match = re.search(
+        r"(?im)^\s*(?:#{1,6}\s*)?_?\*\*?references\*\*?_?\s*$|^\s*references\s*$|^\s*bibliography\s*$|^\s*works\s+cited\s*$|^\s*literature\s+cited\s*$",
+        text,
+    )
+    extra_endmatter_match = re.search(
+        r"(?im)^\s*(?:#{1,6}\s*)?(acknowledg(?:e)?ments|conflict of interest|compliance with ethical standards|funding|author contributions|data availability|ethics statement|supplementary material|open access|copyright)",
+        text,
+    )
+
+    extra_cut_lines: List[int] = []
+    if coi_match:
+        extra_cut_lines.append(text[:coi_match.start()].count("\n"))
+    if references_match:
+        extra_cut_lines.append(text[:references_match.start()].count("\n"))
+    if extra_endmatter_match:
+        extra_cut_lines.append(text[:extra_endmatter_match.start()].count("\n"))
+    if numbered_ref_idx is not None:
+        extra_cut_lines.append(numbered_ref_idx)
+
+    cut_candidates = [idx for idx in (bib_idx, end_idx) if idx is not None] + extra_cut_lines
+    if not cut_candidates:
+        return None
+
+    return min(cut_candidates)
+
+
+def clean_document_text(text: str, *, remove_tables: bool = False) -> str:
+    if not text:
+        return ""
+
+    text = normalize_text(text)
+    text = drop_top_author_block(text)
+
+    lines = text.split("\n")
+    cleaned_lines: List[str] = []
+
+    skip_license_block = False
+    skip_caption_block = False
+
+    for line in lines:
+        line = strip_heading_author(line)
+        stripped = line.strip()
+        lower = stripped.lower()
+
+        if not stripped:
+            if not skip_license_block and not skip_caption_block:
+                cleaned_lines.append("")
             continue
 
-        if looks_like_author_line(ln):
-            lines[i] = ""
+        if is_license_start(lower):
+            skip_license_block = True
+            continue
 
-    cleaned = "\n".join(lines)
+        if skip_license_block:
+            continue
+
+        if is_header_junk(lower) and not PAGE_MARKER.fullmatch(stripped):
+            continue
+
+        if is_junk_line(stripped):
+            continue
+
+        if lower.startswith("**figure") or lower.startswith("figure "):
+            skip_caption_block = True
+            continue
+        if lower.startswith("**table") or lower.startswith("table "):
+            skip_caption_block = True
+            continue
+
+        if skip_caption_block:
+            if PAGE_MARKER.fullmatch(stripped):
+                cleaned_lines.append(stripped)
+                continue
+            if len(stripped) > 60 and stripped[0].isalpha():
+                skip_caption_block = False
+            else:
+                continue
+
+        if remove_tables:
+            if stripped.count("|") >= 2:
+                continue
+            if re.fullmatch(r"[\-:|\s]+", stripped):
+                continue
+
+        cleaned_lines.append(line.rstrip())
+
+    cleaned = "\n".join(cleaned_lines)
+    cleaned = drop_matching_lines(cleaned, DROP_LINE_PATTERNS)
+    cleaned = drop_inline_citations(cleaned)
+    cleaned = dedupe_paragraphs(cleaned).strip()
+
+    cut_idx = find_cutoff(cleaned)
+    if cut_idx is not None:
+        lines = cleaned.split("\n")
+        cleaned = "\n".join(lines[:cut_idx]).strip()
+
+    cleaned = repair_text(cleaned)
+    cleaned = drop_matching_lines(cleaned, DROP_LINE_PATTERNS)
+    cleaned = normalize_text(cleaned).strip()
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
-    return cleaned.strip() + "\n"
+
+    return cleaned + "\n" if cleaned else ""

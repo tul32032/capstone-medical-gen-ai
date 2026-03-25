@@ -1,5 +1,6 @@
 import os
 import requests
+from pdf_processing.upload_ingest import ingest_uploaded_pdf
 from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -70,14 +71,26 @@ class UploadFile(View):
         if not file:
             return JsonResponse({"error": "Missing required field: file"}, status=400)
 
+        md_text = ingest_uploaded_pdf(file)
+        if not md_text:
+            return JsonResponse({"error": "Failed to process PDF into markdown"}, status=500)
+
         try:
+            filename = f"{os.path.splitext(file.name)[0]}.md"
             response = requests.post(
                 f"{AI_INFRA_BASE_URL}/ingest/{PROJECT_ID}/upload",
                 headers={
                     "Authorization": f"Bearer {API_KEY}",
                 },
-                files={"file": (file.name, file, file.content_type)},
+                files={"file": (filename, md_text.encode("utf-8"), "text/markdown")},
             )
-            return JsonResponse(response.json(), status=response.status_code)
+            return JsonResponse(
+                {
+                    "success": response.status_code in (200, 201),
+                    "status": response.status_code,
+                    "infra_response": response.json(),
+                },
+                status=response.status_code,
+            )
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)

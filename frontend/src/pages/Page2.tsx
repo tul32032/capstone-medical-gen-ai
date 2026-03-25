@@ -8,8 +8,9 @@ type UploadedDoc = {
   id: string;
   name: string;
   status: "uploading" | "success" | "error";
-  chunkCount?: number;
   error?: string;
+  infraStatus?: number;
+  infraSuccess?: boolean;
 };
 
 const Page2 = () => {
@@ -47,8 +48,13 @@ const Page2 = () => {
           ? await response.json()
           : { error: await response.text() };
 
-        if (!response.ok) {
-          throw new Error(data.error || data.detail || "Upload failed.");
+        if (!response.ok || data.success === false) {
+          throw new Error(
+            data.infra_error ||
+              data.error ||
+              data.detail ||
+              `Upload failed${data.status ? ` (${data.status})` : "."}`
+          );
         }
 
         setFiles((prev) =>
@@ -57,7 +63,8 @@ const Page2 = () => {
               ? {
                   ...file,
                   status: "success",
-                  chunkCount: data.chunk_count ?? 0,
+                  infraStatus: data.status,
+                  infraSuccess: data.success,
                 }
               : file
           )
@@ -109,10 +116,16 @@ const Page2 = () => {
             <div key={file.id} className="file-card">
               <p>{file.name}</p>
               <p>Status: {file.status}</p>
+
               {file.status === "success" && (
-                <p>Chunks created: {file.chunkCount ?? 0}</p>
+                <p style={{ color: "green" }}>
+                  Sent to infra ✓{file.infraStatus ? ` (${file.infraStatus})` : ""}
+                </p>
               )}
-              {file.status === "error" && <p>Error: {file.error}</p>}
+
+              {file.status === "error" && (
+                <p style={{ color: "red" }}>Error: {file.error}</p>
+              )}
             </div>
           ))
         )}

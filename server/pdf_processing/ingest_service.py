@@ -1,10 +1,29 @@
 from pathlib import Path
 
-from .file_writer import write_chunks
-from .pdf_extractor import (
-    extract_chunks_with_fitz_fallback,
-    extract_chunks_with_pymupdf4llm,
-)
+from .pdf_extractor import extract_markdown_pages
+from .text_cleaner import clean_document_text
+
+from .file_writer import write_md
+
+
+def build_md(pages: list[dict], *, remove_tables: bool) -> str:
+    parts: list[str] = []
+
+    for page in pages:
+        page_number = page.get("page", 1)
+        text = page.get("text", "")
+
+        if not text or not str(text).strip():
+            continue
+
+        cleaned = clean_document_text(str(text), remove_tables=remove_tables)
+        if not cleaned.strip():
+            continue
+
+        parts.append(f"\n<!-- page: {page_number} -->\n")
+        parts.append(cleaned.strip() + "\n")
+
+    return ("".join(parts).strip() + "\n") if parts else ""
 
 
 def run_one(
@@ -12,40 +31,45 @@ def run_one(
     out_dir: Path,
     *,
     remove_tables: bool,
-    max_chars: int,
-    max_words: int,
-) -> tuple[Path, int]:
-    chunks = []
+) -> Path | None:
+    """Convert a single PDF into ONE cleaned markdown file."""
 
     try:
-        chunks = extract_chunks_with_pymupdf4llm(
-            pdf_path,
-            remove_tables=remove_tables,
-            max_chars=max_chars,
-            max_words=max_words,
-        )
-        if chunks:
-            print(f"[layout] pymupdf4llm succeeded for {pdf_path.name} with {len(chunks)} chunks.")
-        else:
-            print(f"[warn] pymupdf4llm returned no chunks for {pdf_path.name}")
+        pages = extract_markdown_pages(pdf_path)
+        print(f"[extract] extracted {len(pages)} pages from {pdf_path.name}")
     except Exception as err:
-        print(f"[error] pymupdf4llm failed for {pdf_path.name}: {err}")
+        print(f"[error] extraction failed for {pdf_path.name}: {err}")
+        return None
 
-    if not chunks:
-        print(f"[fallback] Trying raw PyMuPDF text extraction for {pdf_path.name}...")
-        try:
-            chunks = extract_chunks_with_fitz_fallback(
-                pdf_path,
-                max_chars=max_chars,
-                max_words=max_words,
-            )
+    md = build_md(pages, remove_tables=remove_tables)
+    if not md:
+        print(f"[warn] no cleaned markdown generated for {pdf_path.name}")
+        return None
 
-            if chunks:
-                print(f"[fallback] Raw PyMuPDF extraction succeeded for {pdf_path.name}.")
-            else:
-                print(f"[fallback] Raw PyMuPDF extraction also produced no text for {pdf_path.name}.")
-        except Exception as fb_err:
-            print(f"[fallback] Raw PyMuPDF fallback failed for {pdf_path.name}: {fb_err}")
+    try:
+        output_path = write_md(out_dir, pdf_path, md)
+        print(f"[write] wrote markdown: {output_path}")
+        return output_path
+    except Exception as write_err:
+        print(f"[error] failed to write markdown for {pdf_path.name}: {write_err}")
+        return None
 
-    pdf_out_dir, written = write_chunks(out_dir, pdf_path, chunks)
-    return pdf_out_dir, written
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) < 3:
+        print("Usage: python3 -m server.pdf_processing.ingest_service <pdf_path> <output_dir>")
+        sys.exit(1)
+
+    pdf_path = Path(sys.argv[1])
+    out_dir = Path(sys.argv[2])
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    result = run_one(pdf_path, out_dir, remove_tables=False)
+
+    if result:
+        print(f"Done: {result}")
+    else:
+        print("Failed to process PDF")
