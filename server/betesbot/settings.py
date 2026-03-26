@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from dotenv import load_dotenv
 from pathlib import Path
 import os
+from corsheaders.defaults import default_headers
 
 load_dotenv()
 
@@ -134,8 +135,16 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app",
+]
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "authorization",
+    "content-type",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
