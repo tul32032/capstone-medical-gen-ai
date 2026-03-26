@@ -60,6 +60,7 @@ const Page1 = () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/chat/`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: finalMessage }),
       });
