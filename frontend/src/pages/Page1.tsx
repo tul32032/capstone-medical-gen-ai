@@ -56,51 +56,68 @@ const Page1 = () => {
       JSON.stringify([newChat, ...existing])
     );
   };
+    const handleSend = async (customMessage?: string) => {
+      const finalMessage = customMessage ?? message;
+      if (!finalMessage.trim()) return;
 
-  const handleSend = async (customMessage?: string) => {
-    const finalMessage = customMessage ?? message;
-    if (!finalMessage.trim()) return;
-
-    setLoading(true);
-    setHasStartedChat(true);
-
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: finalMessage }
-    ]);
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/chat/`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: finalMessage }),
-      });
-
-      const data = await res.json();
+      setLoading(true);
+      setHasStartedChat(true);
 
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          text: data.answer ?? "",
-          citations: data.citations ?? []
+        { role: "user", text: finalMessage }
+      ]);
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/chat/`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: finalMessage }),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Request failed with status ${res.status}`);
         }
-      ]);
 
-      saveChatToHistory(finalMessage, data.answer ?? "");
-    } catch (err) {
-      const errorMessage = "Error: " + (err as Error).message;
+        const data = await res.json();
+        console.log("API response:", data);
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", text: errorMessage }
-      ]);
-    } finally {
-      setLoading(false);
-      setMessage("");
-    }
-  };
+        const assistantText =
+          data.answer ||
+          data.response ||
+          data.message ||
+          data.reply ||
+          "No response returned from server.";
+
+        const assistantCitations =
+          data.citations ||
+          data.sources ||
+          data.references ||
+          [];
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            text: assistantText,
+            citations: assistantCitations
+          }
+        ]);
+
+        saveChatToHistory(finalMessage, assistantText);
+      } catch (err) {
+        const errorMessage = "Error: " + (err as Error).message;
+
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", text: errorMessage }
+        ]);
+      } finally {
+        setLoading(false);
+        setMessage("");
+      }
+    };
 
   return (
     <div className="chat-container">
