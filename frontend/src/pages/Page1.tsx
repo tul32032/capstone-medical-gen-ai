@@ -25,11 +25,20 @@ const quickPrompts = [
   }
 ];
 
+type Citation =
+  | { source?: string; content?: string; url?: string; score?: number }
+  | string;
+
+type Message = {
+  role: "user" | "assistant";
+  text: string;
+  citations?: Citation[];
+};
+
 const Page1 = () => {
   const [message, setMessage] = useState("");
-  const [answer, setAnswer] = useState("");
-  type Citation = { source?: string; content?: string; url?: string; score?: number } | string;
-  const [citations, setCitations] = useState<Citation[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [hasStartedChat, setHasStartedChat] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const saveChatToHistory = (prompt: string, reply: string) => {
@@ -50,12 +59,15 @@ const Page1 = () => {
 
   const handleSend = async (customMessage?: string) => {
     const finalMessage = customMessage ?? message;
-
     if (!finalMessage.trim()) return;
 
     setLoading(true);
-    setAnswer("");
-    setCitations([]);
+    setHasStartedChat(true);
+
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: finalMessage }
+    ]);
 
     try {
       const res = await fetch(`${API_BASE_URL}/api/chat/`, {
@@ -64,15 +76,26 @@ const Page1 = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: finalMessage }),
       });
+
       const data = await res.json();
 
-      setAnswer(data.answer ?? "");
-      setCitations(data.citations ?? []);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: data.answer ?? "",
+          citations: data.citations ?? []
+        }
+      ]);
+
       saveChatToHistory(finalMessage, data.answer ?? "");
     } catch (err) {
       const errorMessage = "Error: " + (err as Error).message;
-      setAnswer(errorMessage);
-      saveChatToHistory(finalMessage, errorMessage);
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: errorMessage }
+      ]);
     } finally {
       setLoading(false);
       setMessage("");
@@ -81,26 +104,76 @@ const Page1 = () => {
 
   return (
     <div className="chat-container">
-      <h1 className="page-title">Ask about diabetes!</h1>
+      {!hasStartedChat && (
+        <h1 className="page-title">Ask about diabetes!</h1>
+      )}
 
-      <div className="quick-actions">
-        {quickPrompts.map((item) => (
-          <button
-            key={item.title}
-            className="quick-action-card"
-            onClick={() => {
-              setMessage(item.prompt);
-              handleSend(item.prompt);
-            }}
-            disabled={loading}
-          >
-            <span className="quick-action-title">{item.title}</span>
-            <span className="quick-action-description">{item.description}</span>
-          </button>
-        ))}
-      </div>
+      {!hasStartedChat && (
+        <div className="quick-actions">
+          {quickPrompts.map((item) => (
+            <button
+              key={item.title}
+              className="quick-action-card"
+              onClick={() => handleSend(item.prompt)}
+              disabled={loading}
+            >
+              <span className="quick-action-title">{item.title}</span>
+              <span className="quick-action-description">
+                {item.description}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
 
-      <div className="chat-input-container">
+      {hasStartedChat && (
+        <div className="chat-thread">
+          {messages.map((msg, index) =>
+            msg.role === "user" ? (
+              <div key={index} className="user-message-row">
+                <div className="user-message-bubble">{msg.text}</div>
+              </div>
+            ) : (
+              <div key={index} className="assistant-message-row">
+                <div className="assistant-message-bubble">
+                  <p className="response-answer">{msg.text}</p>
+
+                  {msg.citations && msg.citations.length > 0 && (
+                    <div className="citations">
+                      <h3 className="citations-title">References</h3>
+                      <ul className="citations-list">
+                        {msg.citations.map((cite, i) => (
+                          <li key={i}>
+                            {typeof cite === "string"
+                              ? cite
+                              : cite.url
+                              ? (
+                                  <a
+                                    href={cite.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {cite.source ?? cite.url}
+                                  </a>
+                                )
+                              : cite.source ?? JSON.stringify(cite)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      <div
+        className={`chat-input-container ${
+          hasStartedChat ? "chat-input-after-send" : ""
+        }`}
+      >
         <input
           type="text"
           placeholder="Type your question..."
@@ -115,32 +188,14 @@ const Page1 = () => {
           className="chat-input"
         />
 
-        <button onClick={() => handleSend()} className="send-btn" disabled={loading}>
+        <button
+          onClick={() => handleSend()}
+          className="send-btn"
+          disabled={loading}
+        >
           {loading ? "Sending..." : "Send"}
         </button>
       </div>
-
-      {answer && (
-        <div className="response-container">
-          <p className="response-answer">{answer}</p>
-          {citations.length > 0 && (
-            <div className="citations">
-              <h3 className="citations-title">References</h3>
-              <ul className="citations-list">
-                {citations.map((cite, i) => (
-                  <li key={i}>
-                    {typeof cite === "string"
-                      ? cite
-                      : cite.url
-                      ? <a href={cite.url} target="_blank" rel="noopener noreferrer">{cite.source ?? cite.url}</a>
-                      : cite.source ?? JSON.stringify(cite)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

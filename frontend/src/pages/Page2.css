@@ -5,11 +5,12 @@
 }
 
 .library-title {
-  font-size: 42px;
-  font-weight: 500;
-  color: rgb(16, 35, 53);
+  font-size: 40px;
+  font-weight: 300;
+  font-family: Arial, Arial, Helvetica, sans-serif;
   margin-bottom: 30px;
   text-align: center;
+  color: rgb(37, 49, 61);
 }
 
 .upload-section {
