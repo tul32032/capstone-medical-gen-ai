@@ -102,7 +102,7 @@ const Page2 = () => {
           id="fileUpload"
           type="file"
           multiple
-          accept=".pdf"
+          accept=".pdf,application/pdf,.txt"
           onChange={handleFileChange}
           className="file-input"
         />
