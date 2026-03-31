@@ -1,0 +1,1 @@
+DATABASE_URL=postgresql://user:password@CLOUD_IP:5432/meddb
