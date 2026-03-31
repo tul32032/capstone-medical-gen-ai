@@ -51,7 +51,6 @@ class ChatProxyView(View):
                     "project_id": PROJECT_ID,
                     "system_prompt": SYSTEM_PROMPT,
                 },
-                timeout=30,
             )
             data = response.json()
             return JsonResponse(
@@ -84,7 +83,6 @@ class UploadFile(View):
                     "Authorization": f"Bearer {API_KEY}",
                 },
                 files={"file": (filename, md_text.encode("utf-8"), "text/markdown")},
-                timeout=30,
             )
             return JsonResponse(
                 {
