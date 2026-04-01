@@ -51,12 +51,18 @@ class ChatProxyView(View):
                     "project_id": PROJECT_ID,
                     "system_prompt": SYSTEM_PROMPT,
                 },
+                timeout=(10, 120),
             )
-            data = response.json()
+            try:
+                data = response.json()
+            except ValueError:
+                data = {}
+
             return JsonResponse(
                 {
                     "answer": data.get("answer", ""),
                     "citations": data.get("citations", []),
+                    "infra_status": response.status_code,
                 },
                 status=response.status_code,
             )
@@ -83,12 +89,18 @@ class UploadFile(View):
                     "Authorization": f"Bearer {API_KEY}",
                 },
                 files={"file": (filename, md_text.encode("utf-8"), "text/markdown")},
+                timeout=(10, 180),
             )
+            try:
+                infra_response = response.json()
+            except ValueError:
+                infra_response = {"raw_response": response.text}
+
             return JsonResponse(
                 {
                     "success": response.status_code in (200, 201),
                     "status": response.status_code,
-                    "infra_response": response.json(),
+                    "infra_response": infra_response,
                 },
                 status=response.status_code,
             )
