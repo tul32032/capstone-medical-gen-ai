@@ -100,16 +100,33 @@ const Page1 = () => {
     ]);
 
     try {
-      await new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(() => resolve(), 4000);
-
-        abortController.signal.addEventListener("abort", () => {
-          clearTimeout(timer);
-          reject(new DOMException("Aborted", "AbortError"));
-        });
+      const res = await fetch(`${API_BASE_URL}/api/chat/`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: finalMessage }),
+        signal: abortController.signal,
       });
 
-      const assistantText = "Test response. The loader and stop button are working.";
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("API response:", data);
+
+      const assistantText =
+        data.answer ||
+        data.response ||
+        data.message ||
+        data.reply ||
+        "No response returned from server.";
+
+      const assistantCitations =
+        data.citations ||
+        data.sources ||
+        data.references ||
+        [];
 
       setMessages((prev) =>
         prev.map((msg, index) =>
@@ -118,11 +135,14 @@ const Page1 = () => {
           msg.text === "__loading__"
             ? {
                 role: "assistant",
-                text: assistantText
+                text: assistantText,
+                citations: assistantCitations
               }
             : msg
         )
       );
+
+      saveChatToHistory(finalMessage, assistantText);
     } catch (err) {
       const error = err as Error;
 
