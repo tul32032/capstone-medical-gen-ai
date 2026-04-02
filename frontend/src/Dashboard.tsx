@@ -35,7 +35,7 @@ const Dashboard = () => {
     const saved = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
 
     const cleanedHistory = saved.filter(
-      (chat: any) =>
+      (chat: ChatHistoryItem) =>
         chat &&
         typeof chat.prompt === "string" &&
         chat.prompt.trim() !== "" &&
