@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Page1.css";
 import { API_BASE_URL } from "../constants/constants";
+import logo2 from "../assets/BB2.png";
 
 const quickPrompts = [
   {
@@ -41,6 +42,23 @@ const Page1 = () => {
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const activeChat = JSON.parse(
+      localStorage.getItem("betesbot_active_chat") || "null"
+    );
+
+    if (activeChat) {
+      setMessages([
+        { role: "user", text: activeChat.prompt },
+        { role: "assistant", text: activeChat.reply }
+      ]);
+      setHasStartedChat(true);
+    } else {
+      setMessages([]);
+      setHasStartedChat(false);
+    }
+  }, []);
+
   const saveChatToHistory = (prompt: string, reply: string) => {
     const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
 
@@ -55,76 +73,78 @@ const Page1 = () => {
       "betesbot_history",
       JSON.stringify([newChat, ...existing])
     );
-  };
-    const handleSend = async (customMessage?: string) => {
-      const finalMessage = customMessage ?? message;
-      if (!finalMessage.trim()) return;
 
-      setLoading(true);
-      setHasStartedChat(true);
+    localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
+  };
+
+  const handleSend = async (customMessage?: string) => {
+    const finalMessage = customMessage ?? message;
+    if (!finalMessage.trim()) return;
+
+    setLoading(true);
+    setHasStartedChat(true);
+
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: finalMessage }
+    ]);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/chat/`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: finalMessage }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("API response:", data);
+
+      const assistantText =
+        data.answer ||
+        data.response ||
+        data.message ||
+        data.reply ||
+        "No response returned from server.";
+
+      const assistantCitations =
+        data.citations ||
+        data.sources ||
+        data.references ||
+        [];
 
       setMessages((prev) => [
         ...prev,
-        { role: "user", text: finalMessage }
+        {
+          role: "assistant",
+          text: assistantText,
+          citations: assistantCitations
+        }
       ]);
 
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/chat/`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: finalMessage }),
-        });
+      saveChatToHistory(finalMessage, assistantText);
+    } catch (err) {
+      const errorMessage = "Error: " + (err as Error).message;
 
-        if (!res.ok) {
-          throw new Error(`Request failed with status ${res.status}`);
-        }
-
-        const data = await res.json();
-        console.log("API response:", data);
-
-        const assistantText =
-          data.answer ||
-          data.response ||
-          data.message ||
-          data.reply ||
-          "No response returned from server.";
-
-        const assistantCitations =
-          data.citations ||
-          data.sources ||
-          data.references ||
-          [];
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            text: assistantText,
-            citations: assistantCitations
-          }
-        ]);
-
-        saveChatToHistory(finalMessage, assistantText);
-      } catch (err) {
-        const errorMessage = "Error: " + (err as Error).message;
-
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", text: errorMessage }
-        ]);
-      } finally {
-        setLoading(false);
-        setMessage("");
-      }
-    };
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: errorMessage }
+      ]);
+    } finally {
+      setLoading(false);
+      setMessage("");
+    }
+  };
 
   return (
     <div className="chat-container">
       {!hasStartedChat && (
         <h1 className="page-title">Ask about diabetes!</h1>
       )}
-
       {!hasStartedChat && (
         <div className="quick-actions">
           {quickPrompts.map((item) => (
