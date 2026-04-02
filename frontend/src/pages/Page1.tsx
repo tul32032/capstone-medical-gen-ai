@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Page1.css";
 import { API_BASE_URL } from "../constants/constants";
-import logo2 from "../assets/BB2.png";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 const quickPrompts = [
   {
@@ -41,6 +41,7 @@ const Page1 = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const [loading, setLoading] = useState(false);
+  const controllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const activeChat = JSON.parse(
@@ -77,64 +78,79 @@ const Page1 = () => {
     localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
   };
 
+  const handleStop = () => {
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+  };
+
   const handleSend = async (customMessage?: string) => {
     const finalMessage = customMessage ?? message;
-    if (!finalMessage.trim()) return;
+    if (!finalMessage.trim() || loading) return;
+
+    const abortController = new AbortController();
+    controllerRef.current = abortController;
 
     setLoading(true);
     setHasStartedChat(true);
 
     setMessages((prev) => [
       ...prev,
-      { role: "user", text: finalMessage }
+      { role: "user", text: finalMessage },
+      { role: "assistant", text: "__loading__" }
     ]);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/chat/`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: finalMessage }),
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => resolve(), 4000);
+
+        abortController.signal.addEventListener("abort", () => {
+          clearTimeout(timer);
+          reject(new DOMException("Aborted", "AbortError"));
+        });
       });
 
-      if (!res.ok) {
-        throw new Error(`Request failed with status ${res.status}`);
-      }
+      const assistantText = "Test response. The loader and stop button are working.";
 
-      const data = await res.json();
-      console.log("API response:", data);
-
-      const assistantText =
-        data.answer ||
-        data.response ||
-        data.message ||
-        data.reply ||
-        "No response returned from server.";
-
-      const assistantCitations =
-        data.citations ||
-        data.sources ||
-        data.references ||
-        [];
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          text: assistantText,
-          citations: assistantCitations
-        }
-      ]);
-
-      saveChatToHistory(finalMessage, assistantText);
+      setMessages((prev) =>
+        prev.map((msg, index) =>
+          index === prev.length - 1 &&
+          msg.role === "assistant" &&
+          msg.text === "__loading__"
+            ? {
+                role: "assistant",
+                text: assistantText
+              }
+            : msg
+        )
+      );
     } catch (err) {
-      const errorMessage = "Error: " + (err as Error).message;
+      const error = err as Error;
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", text: errorMessage }
-      ]);
+      if (error.name === "AbortError") {
+        setMessages((prev) =>
+          prev.map((msg, index) =>
+            index === prev.length - 1 &&
+            msg.role === "assistant" &&
+            msg.text === "__loading__"
+              ? { role: "assistant", text: "Stopped." }
+              : msg
+          )
+        );
+      } else {
+        const errorMessage = "Error: " + error.message;
+
+        setMessages((prev) =>
+          prev.map((msg, index) =>
+            index === prev.length - 1 &&
+            msg.role === "assistant" &&
+            msg.text === "__loading__"
+              ? { role: "assistant", text: errorMessage }
+              : msg
+          )
+        );
+      }
     } finally {
+      controllerRef.current = null;
       setLoading(false);
       setMessage("");
     }
@@ -145,6 +161,7 @@ const Page1 = () => {
       {!hasStartedChat && (
         <h1 className="page-title">Ask about diabetes!</h1>
       )}
+
       {!hasStartedChat && (
         <div className="quick-actions">
           {quickPrompts.map((item) => (
@@ -173,31 +190,37 @@ const Page1 = () => {
             ) : (
               <div key={index} className="assistant-message-row">
                 <div className="assistant-message-bubble">
-                  <p className="response-answer">{msg.text}</p>
+                  {msg.text === "__loading__" ? (
+                    <div className="loader"></div>
+                  ) : (
+                    <>
+                      <p className="response-answer">{msg.text}</p>
 
-                  {msg.citations && msg.citations.length > 0 && (
-                    <div className="citations">
-                      <h3 className="citations-title">References</h3>
-                      <ul className="citations-list">
-                        {msg.citations.map((cite, i) => (
-                          <li key={i}>
-                            {typeof cite === "string"
-                              ? cite
-                              : cite.url
-                              ? (
-                                  <a
-                                    href={cite.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    {cite.source ?? cite.url}
-                                  </a>
-                                )
-                              : cite.source ?? JSON.stringify(cite)}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                      {msg.citations && msg.citations.length > 0 && (
+                        <div className="citations">
+                          <h3 className="citations-title">References</h3>
+                          <ul className="citations-list">
+                            {msg.citations.map((cite, i) => (
+                              <li key={i}>
+                                {typeof cite === "string"
+                                  ? cite
+                                  : cite.url
+                                  ? (
+                                      <a
+                                        href={cite.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        {cite.source ?? cite.url}
+                                      </a>
+                                    )
+                                  : cite.source ?? JSON.stringify(cite)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -219,18 +242,25 @@ const Page1 = () => {
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              handleSend();
+              if (loading) {
+                handleStop();
+              } else {
+                handleSend();
+              }
             }
           }}
           className="chat-input"
         />
 
         <button
-          onClick={() => handleSend()}
+          onClick={loading ? handleStop : () => handleSend()}
           className="send-btn"
-          disabled={loading}
         >
-          {loading ? "Sending..." : "Send"}
+          {loading ? (
+            <i className="fa-solid fa-square"></i>
+          ) : (
+            <i className="fa-solid fa-arrow-up"></i>
+          )}
         </button>
       </div>
     </div>
