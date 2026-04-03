@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./Page1.css";
 import { API_BASE_URL } from "../constants/constants";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import ReactMarkdown from "react-markdown";
 
 const quickPrompts = [
   {
@@ -36,6 +37,15 @@ type Message = {
   citations?: Citation[];
 };
 
+const cleanAssistantText = (text: string) => {
+  return text
+    .replace(/^Brief answer:\s*/im, "")
+    .replace(/^Detailed explanation:\s*/im, "")
+    .replace(/^References:\s*/im, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+};
+
 const Page1 = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -51,7 +61,11 @@ const Page1 = () => {
     if (activeChat) {
       setMessages([
         { role: "user", text: activeChat.prompt },
-        { role: "assistant", text: activeChat.reply }
+        {
+          role: "assistant",
+          text: activeChat.reply,
+          citations: activeChat.citations || []
+        }
       ]);
       setHasStartedChat(true);
     } else {
@@ -60,13 +74,18 @@ const Page1 = () => {
     }
   }, []);
 
-  const saveChatToHistory = (prompt: string, reply: string) => {
+  const saveChatToHistory = (
+    prompt: string,
+    reply: string,
+    citations: Citation[] = []
+  ) => {
     const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
 
     const newChat = {
       id: Date.now(),
       prompt,
       reply,
+      citations,
       createdAt: new Date().toLocaleString(),
     };
 
@@ -115,12 +134,14 @@ const Page1 = () => {
       const data = await res.json();
       console.log("API response:", data);
 
-      const assistantText =
+      const rawAssistantText =
         data.answer ||
         data.response ||
         data.message ||
         data.reply ||
         "No response returned from server.";
+
+      const assistantText = cleanAssistantText(rawAssistantText);
 
       const assistantCitations =
         data.citations ||
@@ -142,33 +163,20 @@ const Page1 = () => {
         )
       );
 
-      saveChatToHistory(finalMessage, assistantText);
+      saveChatToHistory(finalMessage, assistantText, assistantCitations);
     } catch (err) {
       const error = err as Error;
+      const errorMessage = "Error: " + error.message;
 
-      if (error.name === "AbortError") {
-        setMessages((prev) =>
-          prev.map((msg, index) =>
-            index === prev.length - 1 &&
-            msg.role === "assistant" &&
-            msg.text === "__loading__"
-              ? { role: "assistant", text: "Stopped." }
-              : msg
-          )
-        );
-      } else {
-        const errorMessage = "Error: " + error.message;
-
-        setMessages((prev) =>
-          prev.map((msg, index) =>
-            index === prev.length - 1 &&
-            msg.role === "assistant" &&
-            msg.text === "__loading__"
-              ? { role: "assistant", text: errorMessage }
-              : msg
-          )
-        );
-      }
+      setMessages((prev) =>
+        prev.map((msg, index) =>
+          index === prev.length - 1 &&
+          msg.role === "assistant" &&
+          msg.text === "__loading__"
+            ? { role: "assistant", text: errorMessage }
+            : msg
+        )
+      );
     } finally {
       controllerRef.current = null;
       setLoading(false);
@@ -214,7 +222,9 @@ const Page1 = () => {
                     <div className="loader"></div>
                   ) : (
                     <>
-                      <p className="response-answer">{msg.text}</p>
+                      <div className="response-answer">
+                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                      </div>
 
                       {msg.citations && msg.citations.length > 0 && (
                         <div className="citations">
@@ -224,8 +234,7 @@ const Page1 = () => {
                               <li key={i}>
                                 {typeof cite === "string"
                                   ? cite
-                                  : cite.url
-                                  ? (
+                                  : cite.url ? (
                                       <a
                                         href={cite.url}
                                         target="_blank"
@@ -233,8 +242,9 @@ const Page1 = () => {
                                       >
                                         {cite.source ?? cite.url}
                                       </a>
-                                    )
-                                  : cite.source ?? JSON.stringify(cite)}
+                                    ) : (
+                                      cite.source ?? JSON.stringify(cite)
+                                    )}
                               </li>
                             ))}
                           </ul>
