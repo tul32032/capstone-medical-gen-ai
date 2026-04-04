@@ -39,13 +39,17 @@ type Message = {
 
 const cleanAssistantText = (text: string) => {
   return text
-    .replace(/^Brief answer:\s*/im, "")
-    .replace(/^Detailed explanation:\s*/im, "")
-    .replace(/^References:\s*/im, "")
+    .replace(/^Brief Answer:\s*/gim, "")
+    .replace(/^Brief answer:\s*/gim, "")
+    .replace(/^Detailed Explanation:\s*/gim, "")
+    .replace(/^Detailed explanation:\s*/gim, "")
+    .replace(/^References:\s*/gim, "")
+    .replace(/^\[\d+\]\s.*$/gm, "")
+    .replace(/\[Source:[^\]]*\]/gi, "")
+    .replace(/\[\d+:\s*[^\]]*\]/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 };
-
 const Page1 = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
