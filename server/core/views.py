@@ -50,6 +50,7 @@ class ChatProxyView(View):
                     "question": message,
                     "project_id": PROJECT_ID,
                     "system_prompt": SYSTEM_PROMPT,
+                    "min_score": 0.8,
                 },
             )
             data = response.json()
