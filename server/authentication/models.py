@@ -12,7 +12,6 @@ class User(AbstractUser):
         max_length=10, choices=REGISTRATION_CHOICES, default="email"
     )
     google_refresh_token = models.TextField(null=True, blank=True)
-    is_admin = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username

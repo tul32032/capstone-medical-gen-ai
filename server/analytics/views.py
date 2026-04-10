@@ -20,7 +20,7 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
     authentication_classes = (JWTCookieAuthentication,)
 
     def get(self, request):
-        if not request.user.is_admin:
+        if not request.user.is_superuser:
             return Response(
                 {"error": "Admin access required"}, status=status.HTTP_403_FORBIDDEN
             )
