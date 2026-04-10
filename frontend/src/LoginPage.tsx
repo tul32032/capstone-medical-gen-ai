@@ -19,7 +19,7 @@ const GOOGLE_AUTH_URL =
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser, setIsAdmin } = useAuth();
 
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
@@ -69,7 +69,9 @@ const LoginPage: React.FC = () => {
         firstName: data.user.first_name,
         lastName: data.user.last_name,
         email: data.user.email,
+        isAdmin: data.user.is_admin || false,
       });
+      setIsAdmin(data.user.is_admin || false);
       navigate("/dashboard");
     } catch {
       setError("Network error. Please check your connection.");

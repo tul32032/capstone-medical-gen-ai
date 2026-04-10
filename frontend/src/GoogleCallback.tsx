@@ -5,7 +5,7 @@ import { API_BASE_URL } from "./constants/constants";
 
 const GoogleCallback: React.FC = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser, setIsAdmin } = useAuth();
   const fetched = useRef(false);
 
   useEffect(() => {
@@ -41,7 +41,9 @@ const GoogleCallback: React.FC = () => {
           firstName: data.user.first_name,
           lastName: data.user.last_name,
           email: data.user.email,
+          isAdmin: data.user.is_admin || false,
         });
+        setIsAdmin(data.user.is_admin || false);
         navigate("/", { replace: true });
       } catch {
         navigate("/login", { replace: true });
@@ -49,7 +51,7 @@ const GoogleCallback: React.FC = () => {
     };
 
     handleCallback();
-  }, [navigate, setUser]);
+  }, [navigate, setUser, setIsAdmin]);
 
   return <div>Signing you in...</div>;
 };

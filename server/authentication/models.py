@@ -5,15 +5,14 @@ from django.db import models
 class User(AbstractUser):
     email = models.CharField(max_length=250, unique=True, null=False, blank=False)
     REGISTRATION_CHOICES = [
-        ('email', 'Email'),
-        ('google', 'Google'),
+        ("email", "Email"),
+        ("google", "Google"),
     ]
     registration_method = models.CharField(
-        max_length=10,
-        choices=REGISTRATION_CHOICES,
-        default='email'
+        max_length=10, choices=REGISTRATION_CHOICES, default="email"
     )
     google_refresh_token = models.TextField(null=True, blank=True)
+    is_admin = models.BooleanField(default=False)
 
     def __str__(self):
-       return self.username
+        return self.username
