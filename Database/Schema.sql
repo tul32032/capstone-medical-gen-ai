@@ -1,27 +1,4 @@
+-- Will change this completely
 CREATE DATABASE db_chatbot;
 
---CREATE USER INFORMATION TABLE
-CREATE TABLE users(
-    user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    email_address TEXT UNIQUE,
-    password_hash TEXT
-);
-
---CREATE SESSION TABLE
-CREATE TABLE sessions(
-    session_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
---CREATE Q&As TABLE
-CREATE TABLE questions(
-    message_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    session_id INT NOT NULL REFERENCES sessions(session_id) ON DELETE CASCADE,
-    time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    question TEXT,
-    answer TEXT,
-    citations TEXT
-);
+python manage.py migrate
