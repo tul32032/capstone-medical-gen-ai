@@ -23,7 +23,7 @@ class JWTRefreshCookieMiddleware:
                 max_age=ACCESS_TOKEN_MAX_AGE,
                 httponly=True,
                 secure=not settings.DEBUG,
-                samesite='Lax',
+                samesite='None',
             )
 
         return response

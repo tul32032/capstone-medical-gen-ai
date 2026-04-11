@@ -53,7 +53,87 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             max_age=ACCESS_TOKEN_MAX_AGE,
             httponly=True,
             secure=not settings.DEBUG,
-            samesite='Lax',
+            samesite='None',
+        )
+        return response
+
+
+class EmailSignupApi(PublicApiMixin, ApiErrorsMixin, APIView):
+    class InputSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=True)
+        password = serializers.CharField(required=True, min_length=8, write_only=True)
+        first_name = serializers.CharField(required=False, default='')
+        last_name = serializers.CharField(required=False, default='')
+
+    def post(self, request, *args, **kwargs):
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+
+        data = input_serializer.validated_data
+        email = data['email']
+
+        if User.objects.filter(email=email).exists():
+            return Response({'error': 'A user with this email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        username = email.split('@')[0]
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f'{base_username}{counter}'
+            counter += 1
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=data['password'],
+            first_name=data.get('first_name', ''),
+            last_name=data.get('last_name', ''),
+            registration_method='email',
+        )
+
+        access_token, _ = generate_tokens_for_user(user)
+
+        response = Response({'user': UserSerializer(user).data}, status=status.HTTP_201_CREATED)
+        response.set_cookie(
+            ACCESS_TOKEN_COOKIE,
+            str(access_token),
+            max_age=ACCESS_TOKEN_MAX_AGE,
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite='None',
+        )
+        return response
+
+
+class EmailLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
+    class InputSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=True)
+        password = serializers.CharField(required=True, write_only=True)
+
+    def post(self, request, *args, **kwargs):
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+
+        data = input_serializer.validated_data
+
+        try:
+            user = User.objects.get(email=data['email'])
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not user.check_password(data['password']):
+            return Response({'error': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        access_token, _ = generate_tokens_for_user(user)
+
+        response = Response({'user': UserSerializer(user).data})
+        response.set_cookie(
+            ACCESS_TOKEN_COOKIE,
+            str(access_token),
+            max_age=ACCESS_TOKEN_MAX_AGE,
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite='None',
         )
         return response
 
