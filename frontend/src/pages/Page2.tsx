@@ -2,7 +2,13 @@ import { useState } from "react";
 import { API_BASE_URL } from "../constants/constants";
 import "./Page2.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import {
+  faUpload,
+  faFileLines,
+  faCircleCheck,
+  faCircleExclamation,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
 type UploadedDoc = {
   id: string;
@@ -22,15 +28,17 @@ const Page2 = () => {
     const selectedFiles = Array.from(e.target.files);
 
     for (const selectedFile of selectedFiles) {
-      const uploadId = `${selectedFile.name}-${selectedFile.size}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const uploadId = `${selectedFile.name}-${selectedFile.size}-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}`;
 
       setFiles((prev) => [
-        ...prev,
         {
           id: uploadId,
           name: selectedFile.name,
           status: "uploading",
         },
+        ...prev,
       ]);
 
       try {
@@ -89,45 +97,152 @@ const Page2 = () => {
     e.target.value = "";
   };
 
+  const recentUploads = files.slice(0, 4);
+
   return (
     <div className="library-container">
-      <h1 className="library-title">Document Library</h1>
-
-      <div className="upload-section">
-        <label htmlFor="fileUpload" className="upload-box">
-          <FontAwesomeIcon icon={faUpload} className="upload-icon" />
-          Click here to upload files
-        </label>
-        <input
-          id="fileUpload"
-          type="file"
-          multiple
-          accept=".pdf,application/pdf,.txt"
-          onChange={handleFileChange}
-          className="file-input"
-        />
+      <div className="library-header">
+        <h1 className="library-title">Document Library</h1>
+        <p className="library-subtitle">
+          Upload medical documents to provide context for AI-generated responses
+        </p>
       </div>
 
-      <div className="file-grid">
-        {files.length === 0 ? (
-          <p className="empty-text">No documents uploaded yet.</p>
-        ) : (
-          files.map((file) => (
-            <div key={file.id} className="file-card">
-              <p>{file.name}</p>
-              <p>Status: {file.status}</p>
+      <div className="library-content">
+        <div className="upload-panel">
+          <label htmlFor="fileUpload" className="upload-box">
+            <FontAwesomeIcon icon={faUpload} className="upload-main-icon" />
+            <p className="upload-heading">Drag & drop files here</p>
+            <span className="upload-button">Upload Documents</span>
+            <p className="upload-support-text">Supports PDF and TXT files</p>
+          </label>
 
-              {file.status === "success" && (
-                <p style={{ color: "green" }}>
-                  Sent to infra ✓{file.infraStatus ? ` (${file.infraStatus})` : ""}
-                </p>
-              )}
+          <input
+            id="fileUpload"
+            type="file"
+            multiple
+            accept=".pdf,application/pdf,.txt"
+            onChange={handleFileChange}
+            className="file-input"
+          />
+        </div>
 
-              {file.status === "error" && (
-                <p style={{ color: "red" }}>Error: {file.error}</p>
-              )}
+        <div className="files-panel">
+          <div className="files-panel-header">
+            <h2>Uploaded Files</h2>
+          </div>
+
+          {files.length === 0 ? (
+            <div className="empty-state">
+              <p className="empty-text">No documents uploaded yet.</p>
             </div>
-          ))
+          ) : (
+            <div className="file-grid">
+              {files.slice(0, 1).map((file) => (
+                <div
+                  key={file.id}
+                  className={`file-card ${
+                    file.status === "success"
+                      ? "file-card--success"
+                      : file.status === "error"
+                      ? "file-card--error"
+                      : ""
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faFileLines} className="file-card__icon" />
+
+                  <p className="file-card__name">{file.name}</p>
+
+                  <div className="file-card__status">
+                    {file.status === "uploading" && (
+                      <>
+                        <FontAwesomeIcon
+                          icon={faSpinner}
+                          spin
+                          className="status-icon status-icon--uploading"
+                        />
+                        <span>Uploading...</span>
+                      </>
+                    )}
+
+                    {file.status === "success" && (
+                      <>
+                        <FontAwesomeIcon
+                          icon={faCircleCheck}
+                          className="status-icon status-icon--success"
+                        />
+                        <span>Uploaded successfully</span>
+                      </>
+                    )}
+
+                    {file.status === "error" && (
+                      <>
+                        <FontAwesomeIcon
+                          icon={faCircleExclamation}
+                          className="status-icon status-icon--error"
+                        />
+                        <span>Upload failed</span>
+                        <span className="status-error-msg">{file.error}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="recent-uploads-section">
+        <div className="recent-uploads-header">
+          <h2>Recent Uploads</h2>
+        </div>
+
+        {recentUploads.length === 0 ? (
+          <div className="recent-uploads-empty">
+            <p>No recent uploads yet.</p>
+          </div>
+        ) : (
+          <div className="recent-uploads-table">
+            <div className="recent-uploads-table-head">
+              <span>Name</span>
+              <span>Status</span>
+              <span>Type</span>
+            </div>
+
+            {recentUploads.map((file) => {
+              const fileType = file.name.toLowerCase().endsWith(".pdf") ? "PDF" : "TXT";
+
+              return (
+                <div key={file.id} className="recent-upload-row">
+                  <div className="recent-upload-name">
+                    <FontAwesomeIcon icon={faFileLines} className="recent-upload-file-icon" />
+                    <span>{file.name}</span>
+                  </div>
+
+                  <div className="recent-upload-status">
+                    <span
+                      className={`recent-status-pill ${
+                        file.status === "success"
+                          ? "recent-status-pill--success"
+                          : file.status === "error"
+                          ? "recent-status-pill--error"
+                          : "recent-status-pill--uploading"
+                      }`}
+                    >
+                      {file.status === "success"
+                        ? "Uploaded"
+                        : file.status === "error"
+                        ? "Failed"
+                        : "Uploading"}
+                    </span>
+                  </div>
+
+                  <div className="recent-upload-type">{fileType}</div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
