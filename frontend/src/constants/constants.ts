@@ -1,5 +1,5 @@
 // Toggle this to switch between local dev and production
-const USE_LOCAL = true;
+const USE_LOCAL = false;
 
 export const GOOGLE_CLIENT_ID = "524283018158-p47d378627gbsposbe6058a0ltnkd8q3.apps.googleusercontent.com";
 
