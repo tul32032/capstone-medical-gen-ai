@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Page1 from './pages/Page1';
 import Page2 from './pages/Page2';
 import Page3 from './pages/Page3';
+import AdminAnalytics from './pages/AdminAnalytics';
 import './Dashboard.css';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,6 +12,7 @@ import {
   faFileLines,
   faCircleUser,
   faArrowRightFromBracket,
+  faChartLine,
 } from '@fortawesome/free-solid-svg-icons';
 
 import { useAuth } from './context/AuthContext';
@@ -29,7 +31,7 @@ const Dashboard = () => {
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
@@ -139,6 +141,15 @@ ${chat.reply}`;
                 {!collapsed && <span className="nav-text">Document Library</span>}
               </Link>
             </li>
+
+            {isAdmin && (
+              <li>
+                <Link to="/dashboard/admin" className="nav-link admin-link">
+                  <FontAwesomeIcon icon={faChartLine} className="nav-icon" />
+                  {!collapsed && <span className="nav-text">Analytics</span>}
+                </Link>
+              </li>
+            )}
           </div>
 
           {!collapsed && history.length > 0 && (
@@ -227,6 +238,7 @@ ${chat.reply}`;
             <Route index element={<Page1 />} />
             <Route path="page2" element={<Page2 />} />
             <Route path="page3" element={<Page3 />} />
+            {isAdmin && <Route path="admin" element={<AdminAnalytics />} />}
           </Routes>
         </div>
       </main>
