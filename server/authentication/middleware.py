@@ -15,7 +15,7 @@ class JWTRefreshCookieMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
 
-        new_token = getattr(request, '_new_access_token', None)
+        new_token = getattr(request, "_new_access_token", None)
         if new_token:
             response.set_cookie(
                 ACCESS_TOKEN_COOKIE,
@@ -23,7 +23,8 @@ class JWTRefreshCookieMiddleware:
                 max_age=ACCESS_TOKEN_MAX_AGE,
                 httponly=True,
                 secure=not settings.DEBUG,
-                samesite='None',
+                samesite="None",
+                partitioned=True,
             )
 
         return response
