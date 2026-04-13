@@ -24,7 +24,6 @@ class JWTRefreshCookieMiddleware:
                 httponly=True,
                 secure=not settings.DEBUG,
                 samesite="None",
-                partitioned=True,
             )
 
         return response
