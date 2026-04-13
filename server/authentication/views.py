@@ -58,7 +58,6 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             httponly=True,
             secure=not settings.DEBUG,
             samesite="None",
-            partitioned=True,
         )
         return response
 
@@ -111,7 +110,6 @@ class EmailSignupApi(PublicApiMixin, ApiErrorsMixin, APIView):
             httponly=True,
             secure=not settings.DEBUG,
             samesite="None",
-            partitioned=True,
         )
         return response
 
@@ -151,7 +149,6 @@ class EmailLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             httponly=True,
             secure=not settings.DEBUG,
             samesite="None",
-            partitioned=True,
         )
         return response
 
