@@ -44,9 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             firstName: data.user.first_name,
             lastName: data.user.last_name,
             email: data.user.email,
-            isAdmin: data.user.is_admin || false,
+            isAdmin: data.user.is_superuser || false,
           });
-          setIsAdmin(data.user.is_admin || false);
+          setIsAdmin(data.user.is_superuser || false);
         }
       })
      .finally(() => setLoading(false));

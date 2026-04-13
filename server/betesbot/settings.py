@@ -146,6 +146,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "authorization",
     "content-type",
 ]
+CORS_EXPOSE_HEADERS = [
+    "Set-Cookie",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
