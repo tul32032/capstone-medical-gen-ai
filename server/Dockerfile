@@ -19,6 +19,8 @@ RUN uv sync --frozen --no-dev
 
 COPY . .
 
+RUN uv run python manage.py migrate
+
 RUN adduser --disabled-password --gecos '' appuser && \
     chown -R appuser:appuser /app
 

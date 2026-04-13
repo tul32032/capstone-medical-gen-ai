@@ -47,7 +47,7 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
         total_documents = len(documents)
 
         budget_data = BudgetUsage.objects.first()
-        gcp_budget_used = budget_data.gcp_cost_estimate if budget_data else 0
+        gcp_budget_used = float(budget_data.gcp_cost_estimate) if budget_data else 0.0
 
         data = {
             "total_queries": total_queries,
