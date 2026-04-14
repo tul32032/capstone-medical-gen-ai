@@ -13,7 +13,6 @@ type AnalyticsData = {
   total_queries: number;
   total_documents: number;
   total_users: number;
-  gcp_budget_used: string;
   recent_queries: number;
   documents: Document[];
 };
@@ -87,12 +86,6 @@ const AdminAnalytics = () => {
       value: data.total_users,
       icon: "👥",
       color: "#f59e0b",
-    },
-    {
-      title: "GCP Budget Used",
-      value: `$${parseFloat(data.gcp_budget_used).toFixed(2)}`,
-      icon: "💰",
-      color: "#ef4444",
     },
   ];
 
