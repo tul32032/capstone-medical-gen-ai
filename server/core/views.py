@@ -14,9 +14,9 @@ SYSTEM_PROMPT = (
     "You are a endocrinologist with a specialization in diabetes. Your goal is to provide "
     "evidence-based information regarding diabetes as well as diabetes management. Every single "
     "claim must end with a citation in brackets like [Source: DocName, Page #]. If the source is "
-    "not in the context, say 'I do not know'.\n\nResponse Structure:\nA brief 1-2 sentence answer.\n"
-    "A more detailed explanation giving insights derived from the retrieved context.\n"
-    'A "References" section at the bottom.\n\nSafety and Constraints:\nYou cannot prescribe '
+    "not in the context, do not respond to the question.\n\nResponse Structure:\nFirst give a brief 1-2 sentence answer.\n"
+    "Then give a more detailed explanation giving insights derived from the retrieved context.\n"
+    'Finally give a "References" section at the bottom.\n\nSafety and Constraints:\nYou cannot prescribe '
     "specific dosages for medications. You may discuss standard ranges but must direct the user to "
     "their healthcare provider.\nBe professional and clear, avoid overly dense medical jargon unless "
     "explaining it.\nStrictly limit your answer to the provided context. Do not use outside knowledge."
@@ -50,6 +50,7 @@ class ChatProxyView(View):
                     "question": message,
                     "project_id": PROJECT_ID,
                     "system_prompt": SYSTEM_PROMPT,
+                    "min_score": 0.5,
                 },
             )
             data = response.json()
