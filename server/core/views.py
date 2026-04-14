@@ -113,7 +113,7 @@ class UploadFile(View):
 
             return JsonResponse(
                 {
-                    "success": complete_response.status_code in (200, 201),
+                    "success": complete_response.status_code in (200, 201, 202),
                     "status": complete_response.status_code,
                     "infra_response": complete_response.json(),
                 },
