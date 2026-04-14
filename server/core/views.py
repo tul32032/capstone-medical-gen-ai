@@ -5,6 +5,16 @@ from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from authentication.backends import JWTCookieAuthentication
+from authentication.models import User
+from analytics.models import Query
 
 AI_INFRA_BASE_URL = "http://10.0.1.5"
 API_KEY = os.environ.get("AI_INFRA_API_KEY", "")
@@ -39,6 +49,13 @@ class ChatProxyView(View):
                 {"error": "Missing required field: message"}, status=400
             )
 
+        user = None
+        auth_result = request.user
+        if isinstance(auth_result, tuple):
+            user = auth_result[0]
+        elif hasattr(request, "user") and request.user.is_authenticated:
+            user = request.user
+
         try:
             response = requests.post(
                 f"{AI_INFRA_BASE_URL}/api/v1/chat",
@@ -54,9 +71,18 @@ class ChatProxyView(View):
                 },
             )
             data = response.json()
+            answer = data.get("answer", "")
+
+            if user:
+                Query.objects.create(
+                    user=user,
+                    message=message,
+                    answer=answer,
+                )
+
             return JsonResponse(
                 {
-                    "answer": data.get("answer", ""),
+                    "answer": answer,
                     "citations": data.get("citations", []),
                 },
                 status=response.status_code,
@@ -74,7 +100,9 @@ class UploadFile(View):
 
         md_text = ingest_uploaded_pdf(file)
         if not md_text:
-            return JsonResponse({"error": "Failed to process PDF into markdown"}, status=500)
+            return JsonResponse(
+                {"error": "Failed to process PDF into markdown"}, status=500
+            )
 
         try:
             filename = f"{os.path.splitext(file.name)[0]}.md"
@@ -115,7 +143,9 @@ class UploadFile(View):
                 {
                     "success": complete_response.status_code in (200, 201, 202),
                     "status": complete_response.status_code,
-                    "message": "Infra accepted upload for processing" if complete_response.status_code == 202 else "Upload successful",
+                    "message": "Infra accepted upload for processing"
+                    if complete_response.status_code == 202
+                    else "Upload successful",
                     "infra_response": complete_response.json(),
                 },
                 status=complete_response.status_code,

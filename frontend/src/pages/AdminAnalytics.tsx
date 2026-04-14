@@ -13,7 +13,6 @@ type AnalyticsData = {
   total_queries: number;
   total_documents: number;
   total_users: number;
-  recent_queries: number;
   documents: Document[];
 };
 
@@ -89,15 +88,6 @@ const AdminAnalytics = () => {
     },
   ];
 
-  const recentCards = [
-    {
-      title: "Queries (Last 7 Days)",
-      value: data.recent_queries,
-      icon: "📈",
-      color: "#8b5cf6",
-    },
-  ];
-
   return (
     <div className="analytics-container">
       <h1 className="analytics-title">Admin Analytics Dashboard</h1>
@@ -109,23 +99,6 @@ const AdminAnalytics = () => {
             <div key={card.title} className="stat-card">
               <div className="stat-icon" style={{ backgroundColor: `${card.color}15` }}>
                 <span style={{ fontSize: "24px" }}>{card.icon}</span>
-              </div>
-              <div className="stat-info">
-                <span className="stat-value">{card.value}</span>
-                <span className="stat-title">{card.title}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="analytics-section">
-        <h2 className="section-title">Recent Activity (Last 7 Days)</h2>
-        <div className="stats-grid small">
-          {recentCards.map((card) => (
-            <div key={card.title} className="stat-card small">
-              <div className="stat-icon" style={{ backgroundColor: `${card.color}15` }}>
-                <span style={{ fontSize: "20px" }}>{card.icon}</span>
               </div>
               <div className="stat-info">
                 <span className="stat-value">{card.value}</span>
