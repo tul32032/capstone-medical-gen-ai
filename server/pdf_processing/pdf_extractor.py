@@ -114,7 +114,7 @@ def extract_markdown_pages(pdf_path: Path) -> List[dict[str, Any]]:
         lambda path, page_chunks: pymupdf4llm.to_markdown(
             path,
             page_chunks=page_chunks,
-            table_strategy="none",
+            table_strategy="lines_strict",
         ),
         "markdown",
     )
