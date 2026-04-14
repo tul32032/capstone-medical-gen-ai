@@ -26,4 +26,4 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uv run gunicorn betesbot.wsgi:application --bind 0.0.0.0:8000 --workers 4"]
+CMD ["sh", "-c", "uv run gunicorn betesbot.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 180"]
