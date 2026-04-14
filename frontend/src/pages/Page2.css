@@ -280,7 +280,9 @@ gap: 16px;
   background: white;
   border: 1px solid #dbe5f5;
   border-radius: 16px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 420px;
 }
 
 .recent-uploads-table-head {
@@ -298,7 +300,7 @@ gap: 16px;
 }
 
 .recent-upload-row:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid #edf2fa;
 }
 
 .recent-upload-name {
