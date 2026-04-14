@@ -32,8 +32,8 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
         total_queries = Query.objects.count()
         total_users = User.objects.count()
 
-        documents = "unknown"
-        total_documents = "unknown"
+        documents = []
+        total_documents = 0
 
         try:
             response = requests.get(
@@ -51,15 +51,11 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
             if isinstance(data, list):
                 documents = data
                 total_documents = len(data)
-            else:
-                documents = "unknown"
-                total_documents = "unknown"
 
-        except (requests.RequestException, ValueError):
-            documents = "unknown"
-            total_documents = "unknown"
+        except (requests.RequestException, ValueError) as e:
+            pass
 
-        total_cost = "unknown"
+        total_cost = 0.0
         try:
             client = bigquery.Client(project=GCP_PROJECT_ID)
 
@@ -75,7 +71,7 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
                     total_cost = float(row.total_cost)
 
         except (GoogleAPIError, Exception):
-            total_cost = "unknown"
+            pass
 
         return Response(
             {
