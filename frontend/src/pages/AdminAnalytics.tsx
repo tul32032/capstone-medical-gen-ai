@@ -17,7 +17,7 @@ type AnalyticsData = {
   total_documents: number;
   total_users: number;
   documents: Document[];
-  total_cost: number | string;
+  total_cost: number;
 };
 
 const AdminAnalytics = () => {
@@ -33,6 +33,10 @@ const AdminAnalytics = () => {
         });
 
         if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (data.error) {
+            throw new Error(data.error);
+          }
           if (res.status === 403) {
             throw new Error("Admin access required");
           }
