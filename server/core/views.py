@@ -1,10 +1,24 @@
 import os
 import requests
+import json
 from pdf_processing.upload_ingest import ingest_uploaded_pdf
 from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Chat, Question
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
+from authentication.backends import JWTCookieAuthentication
+from authentication.models import User
+from analytics.models import Query
 
 AI_INFRA_BASE_URL = "http://10.0.1.5"
 API_KEY = os.environ.get("AI_INFRA_API_KEY", "")
@@ -34,10 +48,22 @@ class ChatProxyView(View):
             return JsonResponse({"error": "Invalid JSON body"}, status=400)
 
         message = body.get("message")
+        chat_id = body.get("chat_id")
+
         if not message:
             return JsonResponse(
                 {"error": "Missing required field: message"}, status=400
             )
+
+        user = None
+        auth_result = request.user
+        if isinstance(auth_result, tuple):
+            user = auth_result[0]
+        elif hasattr(request, "user") and request.user.is_authenticated:
+            user = request.user
+
+        User = request.user
+        chat_id = get_or_create_chat(User, chat_id)
 
         try:
             response = requests.post(
@@ -54,13 +80,32 @@ class ChatProxyView(View):
                 },
             )
             data = response.json()
+            answer = data.get("answer", "")
+            citations = data.get("citations", [])
+
+            if user:
+                Query.objects.create(
+                    user=user,
+                    message=message,
+                    answer=answer,
+                )
+
+            Question.objects.create(
+                user=User,
+                chat=chat_id,
+                question=message,
+                answer=answer,
+                citation=str(citations)
+            )   
+            
             return JsonResponse(
                 {
                     "answer": data.get("answer", ""),
                     "citations": data.get("citations", []),
                 },
-                status=response.status_code,
+                status=response.status_code
             )
+
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)
 
@@ -95,3 +140,52 @@ class UploadFile(View):
             )
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)
+
+
+def get_or_create_chat(user, chat_id=None):
+    if chat_id:
+        return Chat.objects.get(id=chat_id, user=user)
+
+    last_chat = Chat.objects.filter(user=user).order_by('-chat_number').first()
+
+    if last_chat and not last_chat.question_set.exists():
+        return last_chat
+
+    next_number = 1 if not last_chat else last_chat.chat_number + 1
+
+    return Chat.objects.create(
+        user=user,
+        chat_number=next_number
+    )
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ChatHistoryView(LoginRequiredMixin, View):
+    def get(self, request, chat_number):
+        user = request.user
+
+        chat = Chat.objects.filter(user=user, chat_number=chat_number).first()
+        if not chat:
+            return JsonResponse({
+            "error": "Chat not found",
+            "chat_number": chat_number
+        }, status=404)
+
+        questions = Question.objects.filter(
+            user=user,
+            chat=chat
+        ).order_by('created_at')
+
+        data = []
+        for q in questions:
+            data.append({
+                "question": q.question,
+                "answer": q.answer,
+                "citation": q.citation,
+                "timestamp": q.created_at.isoformat()
+            })
+
+        return JsonResponse({
+            "chat_number": chat.chat_number,
+            "chat": data
+        }, status=200)
