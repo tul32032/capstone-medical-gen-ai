@@ -113,8 +113,9 @@ class UploadFile(View):
 
             return JsonResponse(
                 {
-                    "success": complete_response.status_code in (200, 201),
+                    "success": complete_response.status_code in (200, 201, 202),
                     "status": complete_response.status_code,
+                    "message": "Infra accepted upload for processing" if complete_response.status_code == 202 else "Upload successful",
                     "infra_response": complete_response.json(),
                 },
                 status=complete_response.status_code,
