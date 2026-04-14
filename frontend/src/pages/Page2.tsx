@@ -97,7 +97,7 @@ const Page2 = () => {
     e.target.value = "";
   };
 
-  const recentUploads = files.slice(0, 4);
+  const recentUploads = files;
 
   return (
     <div className="library-container">
