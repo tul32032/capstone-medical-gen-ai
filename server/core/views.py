@@ -5,13 +5,8 @@ from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
 from authentication.backends import JWTCookieAuthentication
 from authentication.models import User
 from analytics.models import Query
@@ -33,14 +28,16 @@ SYSTEM_PROMPT = (
 )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class ChatProxyView(View):
+class ChatProxyView(APIView):
+    authentication_classes = (JWTCookieAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         import json
 
         try:
             body = json.loads(request.body)
-        except (json.JSONDecodeError, ValueError):
+        except json.JSONDecodeError, ValueError:
             return JsonResponse({"error": "Invalid JSON body"}, status=400)
 
         message = body.get("message")
@@ -49,12 +46,7 @@ class ChatProxyView(View):
                 {"error": "Missing required field: message"}, status=400
             )
 
-        user = None
-        auth_result = request.user
-        if isinstance(auth_result, tuple):
-            user = auth_result[0]
-        elif hasattr(request, "user") and request.user.is_authenticated:
-            user = request.user
+        user = request.user
 
         try:
             response = requests.post(
@@ -73,12 +65,11 @@ class ChatProxyView(View):
             data = response.json()
             answer = data.get("answer", "")
 
-            if user:
-                Query.objects.create(
-                    user=user,
-                    message=message,
-                    answer=answer,
-                )
+            Query.objects.create(
+                user=user,
+                message=message,
+                answer=answer,
+            )
 
             return JsonResponse(
                 {

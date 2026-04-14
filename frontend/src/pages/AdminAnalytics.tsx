@@ -4,9 +4,12 @@ import { API_BASE_URL } from "../constants/constants";
 
 type Document = {
   id: string;
-  name: string;
-  uploaded_at: string;
-  status?: string;
+  team_id: string;
+  project_id: string;
+  title: string;
+  source_type: string;
+  gcs_uri: string;
+  status: string;
 };
 
 type AnalyticsData = {
@@ -14,6 +17,7 @@ type AnalyticsData = {
   total_documents: number;
   total_users: number;
   documents: Document[];
+  total_cost: number | string;
 };
 
 const AdminAnalytics = () => {
@@ -27,14 +31,14 @@ const AdminAnalytics = () => {
         const res = await fetch(`${API_BASE_URL}/api/analytics/admin/`, {
           credentials: "include",
         });
-        
+
         if (!res.ok) {
           if (res.status === 403) {
             throw new Error("Admin access required");
           }
           throw new Error("Failed to fetch analytics");
         }
-        
+
         const result = await res.json();
         setData(result);
       } catch (err) {
@@ -72,19 +76,24 @@ const AdminAnalytics = () => {
       title: "Total Queries",
       value: data.total_queries,
       icon: "💬",
-      color: "#4770c1",
     },
     {
       title: "Documents Uploaded",
       value: data.total_documents,
       icon: "📄",
-      color: "#22c55e",
     },
     {
       title: "Total Users",
       value: data.total_users,
       icon: "👥",
-      color: "#f59e0b",
+    },
+    {
+      title: "Total Cost",
+      value:
+        typeof data.total_cost === "number"
+          ? `$${data.total_cost.toFixed(2)}`
+          : data.total_cost,
+      icon: "💰",
     },
   ];
 
@@ -97,7 +106,7 @@ const AdminAnalytics = () => {
         <div className="stats-grid">
           {statCards.map((card) => (
             <div key={card.title} className="stat-card">
-              <div className="stat-icon" style={{ backgroundColor: `${card.color}15` }}>
+              <div className="stat-icon">
                 <span style={{ fontSize: "24px" }}>{card.icon}</span>
               </div>
               <div className="stat-info">
@@ -117,16 +126,12 @@ const AdminAnalytics = () => {
               <div key={doc.id} className="document-item">
                 <div className="document-icon">📄</div>
                 <div className="document-info">
-                  <span className="document-name">{doc.name}</span>
-                  <span className="document-date">
-                    {new Date(doc.uploaded_at).toLocaleDateString()}
-                  </span>
+                  <span className="document-name">{doc.title}</span>
+                  <span className="document-date">{doc.source_type}</span>
                 </div>
-                {doc.status && (
-                  <span className={`document-status ${doc.status}`}>
-                    {doc.status}
-                  </span>
-                )}
+                <span className={`document-status ${doc.status}`}>
+                  {doc.status}
+                </span>
               </div>
             ))
           ) : (
