@@ -76,7 +76,7 @@ class ChatProxyView(View):
                     "question": message,
                     "project_id": PROJECT_ID,
                     "system_prompt": SYSTEM_PROMPT,
-                    "min_score": 0.8,
+                    "min_score": 0.5,
                 },
             )
             data = response.json()
@@ -100,7 +100,7 @@ class ChatProxyView(View):
             
             return JsonResponse(
                 {
-                    "answer": data.get("answer", ""),
+                    "answer": answer,
                     "citations": data.get("citations", []),
                 },
                 status=response.status_code
@@ -119,24 +119,55 @@ class UploadFile(View):
 
         md_text = ingest_uploaded_pdf(file)
         if not md_text:
-            return JsonResponse({"error": "Failed to process PDF into markdown"}, status=500)
+            return JsonResponse(
+                {"error": "Failed to process PDF into markdown"}, status=500
+            )
 
         try:
             filename = f"{os.path.splitext(file.name)[0]}.md"
-            response = requests.post(
-                f"{AI_INFRA_BASE_URL}/ingest/{PROJECT_ID}/upload",
+
+            init_response = requests.post(
+                f"{AI_INFRA_BASE_URL}/ingest/{PROJECT_ID}/upload/init",
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "filename": filename,
+                    "content_type": "text/markdown",
+                },
+            )
+            init_response.raise_for_status()
+            init_data = init_response.json()
+
+            upload_url = init_data["upload_url"]
+            session_id = init_data["session_id"]
+
+            put_response = requests.put(
+                upload_url,
+                data=md_text.encode("utf-8"),
+                headers={"Content-Type": "text/markdown"},
+            )
+            put_response.raise_for_status()
+
+            complete_response = requests.post(
+                f"{AI_INFRA_BASE_URL}/ingest/{PROJECT_ID}/upload/{session_id}/complete",
                 headers={
                     "Authorization": f"Bearer {API_KEY}",
                 },
-                files={"file": (filename, md_text.encode("utf-8"), "text/markdown")},
             )
+            complete_response.raise_for_status()
+
             return JsonResponse(
                 {
-                    "success": response.status_code in (200, 201),
-                    "status": response.status_code,
-                    "infra_response": response.json(),
+                    "success": complete_response.status_code in (200, 201, 202),
+                    "status": complete_response.status_code,
+                    "message": "Infra accepted upload for processing"
+                    if complete_response.status_code == 202
+                    else "Upload successful",
+                    "infra_response": complete_response.json(),
                 },
-                status=response.status_code,
+                status=complete_response.status_code,
             )
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)
