@@ -37,7 +37,7 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
 
         try:
             response = requests.get(
-                f"{AI_INFRA_BASE_URL}/api/v1/query/{PROJECT_ID}/documents",
+                f"{AI_INFRA_BASE_URL}/query/{PROJECT_ID}/documents",
                 headers={
                     "Authorization": f"Bearer {API_KEY}",
                     "Content-Type": "application/json",
