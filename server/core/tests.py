@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from unittest.mock import patch
+from rest_framework.test import APIClient
 import json
 
 from core.models import Chat, Question
@@ -104,7 +105,7 @@ class ChatHistoryViewTests(TestCase):
 class ChatIntegrationTests(TestCase):
 
     def setUp(self):
-        self.client = Client()
+        self.client = APIClient()
 
         self.user = User.objects.create_user(
             username="testuser",
@@ -117,6 +118,7 @@ class ChatIntegrationTests(TestCase):
     
     @patch("core.views.requests.post")
     def test_full_chat_flow(self, mock_post):
+        self.client.force_authenticate(user=self.user)
         self.client.login(username="testuser", password="testpass123")
 
         mock_post.return_value.status_code = 200

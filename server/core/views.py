@@ -59,8 +59,6 @@ class ChatProxyView(APIView):
 
         user = request.user
 
-        #might take out
-        user = request.user if request.user.is_authenticated else None
         chat = get_or_create_chat(user, chat_id)
 
         try:
@@ -87,14 +85,13 @@ class ChatProxyView(APIView):
                 answer=answer,
             )
 
-            if user:
-                Question.objects.create(
-                    user=user,
-                    chat=chat,
-                    question=message,
-                    answer=answer,
-                    citation=str(citations)
-                )   
+            Question.objects.create(
+                user=user,
+                chat=chat,
+                question=message,
+                answer=answer,
+                citation=str(citations)
+            )   
             
             return JsonResponse(
                 {
