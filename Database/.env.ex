@@ -1,7 +1,0 @@
-DATABASE_URL=postgresql://user:password@CLOUD_IP:5432/meddb
-
-DATABASE_NAME=med_db
-DATABASE_USERNAME=your_cloud_user
-DATABASE_PASSWORD=your_cloud_password
-DATABASE_HOST=CLOUD_IP
-DATABASE_PORT=5432
