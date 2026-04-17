@@ -55,7 +55,7 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
         except (requests.RequestException, ValueError) as e:
             pass
 
-        total_cost = 26.06
+        total_cost = 0
         try:
             client = bigquery.Client(project=GCP_PROJECT_ID)
 
@@ -68,7 +68,7 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
 
             for row in result:
                 if row.total_cost is not None:
-                    total_cost += float(row.total_cost)
+                    total_cost = float(row.total_cost)
 
         except (GoogleAPIError, Exception):
             pass
