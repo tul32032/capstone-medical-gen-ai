@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./Page3.css";
+import { API_BASE_URL } from "../constants/constants";
 
 type ChatHistoryItem = {
   id: number;
@@ -11,11 +12,37 @@ type ChatHistoryItem = {
 const Page3 = () => {
   const [history, setHistory] = useState<ChatHistoryItem[]>([]);
 
-  useEffect(() => {
-    // TEMP: loading chat history from localStorage (replace with backend fetch later)
-    const saved = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
-    setHistory(saved);
-  }, []);
+useEffect(() => {
+  const fetchHistory = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/history/`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      console.log("history response:", data);
+
+      if (data.error || !data.chat) {
+        setHistory([]);
+        return;
+      }
+
+      setHistory(
+        data.chat.map((item: any, index: number) => ({
+          id: index,
+          prompt: item.question,
+          reply: item.answer,
+          createdAt: item.timestamp,
+        }))
+      );
+    } catch (err) {
+      console.error("failed to fetch history:", err);
+    }
+  };
+
+  fetchHistory();
+}, []);
 
   const handleExport = (chat: ChatHistoryItem) => {
     const text = `BetesBot Chat Export
