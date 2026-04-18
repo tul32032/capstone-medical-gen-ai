@@ -8,22 +8,26 @@ const quickPrompts = [
   {
     title: "Check Symptoms",
     description: "Understand common diabetes symptoms",
-    prompt: "What are the common symptoms of diabetes?"
+    prompt: "What are the common symptoms of diabetes?",
+    icon: "fa-solid fa-stethoscope"
   },
   {
     title: "Blood Sugar Guide",
     description: "View normal ranges and what your levels may mean",
-    prompt: "What are normal blood sugar ranges?"
+    prompt: "What are normal blood sugar ranges?",
+    icon: "fa-solid fa-chart-column"
   },
   {
     title: "Diet Recommendations",
-    description: "Get food suggestions and meal guidance for diabetes",
-    prompt: "What foods are recommended for someone with diabetes?"
+    description: "Get food suggestions and meal guidance for diabetes?",
+    prompt: "What foods are recommended for someone with diabetes?",
+    icon: "fa-solid fa-bowl-food"
   },
   {
     title: "Title Later",
     description: "Paragraph later",
-    prompt: "Give me general diabetes management advice."
+    prompt: "Give me general diabetes management advice.",
+    icon: "fa-solid fa-clipboard-check"
   }
 ];
 
@@ -50,12 +54,14 @@ const cleanAssistantText = (text: string) => {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 };
+
 const Page1 = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const [loading, setLoading] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
+  const [activeChatId, setActiveChatId] = useState<number | null>(null);
 
   useEffect(() => {
     const activeChat = JSON.parse(
@@ -72,6 +78,7 @@ const Page1 = () => {
         }
       ]);
       setHasStartedChat(true);
+      setActiveChatId(activeChat.id); // small add
     } else {
       setMessages([]);
       setHasStartedChat(false);
@@ -79,26 +86,44 @@ const Page1 = () => {
   }, []);
 
   const saveChatToHistory = (
+    chatId: number,
     prompt: string,
     reply: string,
     citations: Citation[] = []
   ) => {
     const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
 
-    const newChat = {
-      id: Date.now(),
-      prompt,
-      reply,
-      citations,
-      createdAt: new Date().toLocaleString(),
-    };
+    const existingIndex = existing.findIndex((chat: any) => chat.id === chatId);
 
-    localStorage.setItem(
-      "betesbot_history",
-      JSON.stringify([newChat, ...existing])
-    );
+    if (existingIndex !== -1) {
+      const updatedChat = {
+        ...existing[existingIndex],
+        prompt: existing[existingIndex].prompt || prompt,
+        reply,
+        citations,
+        createdAt: new Date().toLocaleString(),
+      };
 
-    localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
+      existing[existingIndex] = updatedChat;
+
+      localStorage.setItem("betesbot_history", JSON.stringify(existing));
+      localStorage.setItem("betesbot_active_chat", JSON.stringify(updatedChat));
+    } else {
+      const newChat = {
+        id: chatId,
+        prompt,
+        reply,
+        citations,
+        createdAt: new Date().toLocaleString(),
+      };
+
+      localStorage.setItem(
+        "betesbot_history",
+        JSON.stringify([newChat, ...existing])
+      );
+
+      localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
+    }
   };
 
   const handleStop = () => {
@@ -127,7 +152,10 @@ const Page1 = () => {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: finalMessage }),
+        body: JSON.stringify({
+          message: finalMessage,
+          chat_id: activeChatId
+        }),
         signal: abortController.signal,
       });
 
@@ -136,6 +164,13 @@ const Page1 = () => {
       }
 
       const data = await res.json();
+
+      const currentChatId = data.chat_number ?? activeChatId;
+
+      if (currentChatId) {
+        setActiveChatId(currentChatId);
+      }
+
       console.log("API response:", data);
 
       const rawAssistantText =
@@ -167,7 +202,10 @@ const Page1 = () => {
         )
       );
 
-      saveChatToHistory(finalMessage, assistantText, assistantCitations);
+      if (currentChatId) {
+        saveChatToHistory(currentChatId, finalMessage, assistantText, assistantCitations);
+      }
+
     } catch (err) {
       const error = err as Error;
       const errorMessage = "Error: " + error.message;
@@ -203,10 +241,17 @@ const Page1 = () => {
               onClick={() => handleSend(item.prompt)}
               disabled={loading}
             >
-              <span className="quick-action-title">{item.title}</span>
-              <span className="quick-action-description">
-                {item.description}
-              </span>
+              <div className="quick-action-top">
+                <div className="quick-action-icon-wrap">
+                  <i className={item.icon}></i>
+                </div>
+                <div className="quick-action-text">
+                  <span className="quick-action-title">{item.title}</span>
+                  <span className="quick-action-description">
+                    {item.description}
+                  </span>
+                </div>
+              </div>
             </button>
           ))}
         </div>
