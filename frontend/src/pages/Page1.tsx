@@ -173,9 +173,10 @@ const Page1 = () => {
 
       const data = await res.json();
 
-      const currentChatId = data.chat_number ?? activeChatId;
+      const currentChatId =
+        data.chat_number !== undefined ? data.chat_number : activeChatId;
 
-      if (currentChatId) {
+      if (currentChatId !== null && currentChatId !== undefined) {
         setActiveChatId(currentChatId);
       }
 
@@ -207,7 +208,7 @@ const Page1 = () => {
             : msg
         );
 
-        if (currentChatId) {
+        if (currentChatId !== null && currentChatId !== undefined) {
           saveChatToHistory(
             currentChatId,
             finalMessage,
