@@ -69,16 +69,20 @@ const Page1 = () => {
     );
 
     if (activeChat) {
-      setMessages([
-        { role: "user", text: activeChat.prompt },
-        {
-          role: "assistant",
-          text: activeChat.reply,
-          citations: activeChat.citations || []
-        }
-      ]);
+      if (activeChat.messages) {
+        setMessages(activeChat.messages);
+      } else {
+        setMessages([
+          { role: "user", text: activeChat.prompt },
+          {
+            role: "assistant",
+            text: activeChat.reply,
+            citations: activeChat.citations || []
+          }
+        ]);
+      }
       setHasStartedChat(true);
-      setActiveChatId(activeChat.id); // small add
+      setActiveChatId(activeChat.id);
     } else {
       setMessages([]);
       setHasStartedChat(false);
@@ -89,7 +93,8 @@ const Page1 = () => {
     chatId: number,
     prompt: string,
     reply: string,
-    citations: Citation[] = []
+    citations: Citation[] = [],
+    allMessages: Message[] = []
   ) => {
     const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
 
@@ -101,11 +106,11 @@ const Page1 = () => {
         prompt: existing[existingIndex].prompt || prompt,
         reply,
         citations,
+        messages: allMessages,
         createdAt: new Date().toLocaleString(),
       };
 
       existing[existingIndex] = updatedChat;
-
       localStorage.setItem("betesbot_history", JSON.stringify(existing));
       localStorage.setItem("betesbot_active_chat", JSON.stringify(updatedChat));
     } else {
@@ -114,6 +119,7 @@ const Page1 = () => {
         prompt,
         reply,
         citations,
+        messages: allMessages,
         createdAt: new Date().toLocaleString(),
       };
 
@@ -124,6 +130,8 @@ const Page1 = () => {
 
       localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
     }
+
+    window.dispatchEvent(new Event("betesbot-history-updated"));
   };
 
   const handleStop = () => {
@@ -171,8 +179,6 @@ const Page1 = () => {
         setActiveChatId(currentChatId);
       }
 
-      console.log("API response:", data);
-
       const rawAssistantText =
         data.answer ||
         data.response ||
@@ -188,23 +194,31 @@ const Page1 = () => {
         data.references ||
         [];
 
-      setMessages((prev) =>
-        prev.map((msg, index) =>
+      setMessages((prev) => {
+        const updatedMessages = prev.map((msg, index) =>
           index === prev.length - 1 &&
           msg.role === "assistant" &&
           msg.text === "__loading__"
             ? {
-                role: "assistant",
+                role: "assistant" as const,
                 text: assistantText,
                 citations: assistantCitations
               }
             : msg
-        )
-      );
+        );
 
-      if (currentChatId) {
-        saveChatToHistory(currentChatId, finalMessage, assistantText, assistantCitations);
-      }
+        if (currentChatId) {
+          saveChatToHistory(
+            currentChatId,
+            finalMessage,
+            assistantText,
+            assistantCitations,
+            updatedMessages
+          );
+        }
+
+        return updatedMessages;
+      });
 
     } catch (err) {
       const error = err as Error;
@@ -308,11 +322,7 @@ const Page1 = () => {
         </div>
       )}
 
-      <div
-        className={`chat-input-container ${
-          hasStartedChat ? "chat-input-after-send" : ""
-        }`}
-      >
+      <div className={`chat-input-container ${hasStartedChat ? "chat-input-after-send" : ""}`}>
         <input
           type="text"
           placeholder="Type your question..."
@@ -321,11 +331,8 @@ const Page1 = () => {
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              if (loading) {
-                handleStop();
-              } else {
-                handleSend();
-              }
+              if (loading) handleStop();
+              else handleSend();
             }
           }}
           className="chat-input"
@@ -335,11 +342,7 @@ const Page1 = () => {
           onClick={loading ? handleStop : () => handleSend()}
           className="send-btn"
         >
-          {loading ? (
-            <i className="fa-solid fa-square"></i>
-          ) : (
-            <i className="fa-solid fa-arrow-up"></i>
-          )}
+          {loading ? <i className="fa-solid fa-square"></i> : <i className="fa-solid fa-arrow-up"></i>}
         </button>
       </div>
     </div>

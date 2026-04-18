@@ -34,18 +34,27 @@ const Dashboard = () => {
   const { user, isAdmin, logout } = useAuth();
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
+    const loadHistory = () => {
+      const saved = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
 
-    const cleanedHistory = saved.filter(
-      (chat: ChatHistoryItem) =>
-        chat &&
-        typeof chat.prompt === "string" &&
-        chat.prompt.trim() !== "" &&
-        typeof chat.reply === "string" &&
-        chat.reply.trim() !== ""
-    );
+      const cleanedHistory = saved.filter(
+        (chat: ChatHistoryItem) =>
+          chat &&
+          typeof chat.prompt === "string" &&
+          chat.prompt.trim() !== "" &&
+          typeof chat.reply === "string" &&
+          chat.reply.trim() !== ""
+      );
 
-    setHistory(cleanedHistory);
+      setHistory(cleanedHistory);
+    };
+
+    loadHistory();
+    window.addEventListener("betesbot-history-updated", loadHistory);
+
+    return () => {
+      window.removeEventListener("betesbot-history-updated", loadHistory);
+    };
   }, []);
 
   const toggleSidebar = () => {
