@@ -90,11 +90,12 @@ class ChatProxyView(APIView):
                 chat=chat,
                 question=message,
                 answer=answer,
-                citation=str(citations)
+                citation=citations
             )   
             
             return JsonResponse(
                 {
+                    "chat_id": chat.id,
                     "answer": answer,
                     "citations": data.get("citations", []),
                 },
@@ -171,27 +172,19 @@ class UploadFile(View):
 @method_decorator(csrf_exempt, name="dispatch")
 class ChatHistoryView(LoginRequiredMixin, View):
     def get(self, request):
-        import json
-
         user = request.user
 
-        chat_id = None
-        if request.body:
-            try:
-                body = json.loads(request.body)
-                chat_id = body.get("chat_id")
-            except (json.JSONDecodeError, ValueError):
-                pass
+        chat_id = request.GET.get("chat_id")
 
         if not chat_id:
-            chat = Chat.objects.filter(user=user).order_by("-chat_number").first()
-        else:
-            chat = Chat.objects.filter(user=user, chat_number=chat_id).first()
+            return JsonResponse({"error": "chat_id is required"}, status=400)
+        
+        chat = Chat.objects.filter(user=user, id=chat_id).first()
         
         if not chat:
             return JsonResponse({
             "error": "Chat not found",
-            "chat_number": chat_id
+            "chat_id": chat_id
         }, status=404)
 
         questions = Question.objects.filter(
@@ -209,7 +202,7 @@ class ChatHistoryView(LoginRequiredMixin, View):
             })
 
         return JsonResponse({
-            "chat_number": chat.chat_number,
+            "chat_id": chat.id,
             "chat": data
         }, status=200)
 
@@ -224,15 +217,4 @@ def get_or_create_chat(user, chat_id=None):
         except Chat.DoesNotExist:
             pass
 
-    last_chat = Chat.objects.filter(user=user).order_by('-chat_number').first()
-
-    if last_chat and not last_chat.question_set.exists():
-        return last_chat
-
-    next_number = 1 if not last_chat else last_chat.chat_number + 1
-    #race condition, fix
-
-    return Chat.objects.create(
-        user=user,
-        chat_number=next_number
-    )
+    return Chat.objects.create(user=user)

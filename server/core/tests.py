@@ -19,21 +19,15 @@ class ChatCreationTests(TestCase):
         )
 
     def test_create_new_chat(self):
-        chat = Chat.objects.create(user=self.user, chat_number=1)
+        chat = Chat.objects.create(user=self.user)
 
         self.assertEqual(chat.user, self.user)
-        self.assertEqual(chat.chat_number, 1)
-
-    def test_get_or_create_new_chat(self):
-        chat = Chat.objects.create(user=self.user, chat_number=1)
-
         self.assertIsNotNone(chat.id)
 
-    def test_multiple_chats_increment_number(self):
-        chat1 = Chat.objects.create(user=self.user, chat_number=1)
-        chat2 = Chat.objects.create(user=self.user, chat_number=2)
+    def test_get_or_create_new_chat(self):
+        chat = Chat.objects.create(user=self.user)
 
-        self.assertEqual(chat2.chat_number, chat1.chat_number + 1)
+        self.assertIsNotNone(chat.id)
 
 class QuestionModelTests(TestCase):
 
@@ -42,14 +36,15 @@ class QuestionModelTests(TestCase):
             username="testuser",
             password="testpass123"
         )
-        self.chat = Chat.objects.create(user=self.user, chat_number=1)
+        self.chat = Chat.objects.create(user=self.user)
 
     def test_create_question(self):
         q = Question.objects.create(
             user=self.user,
             chat=self.chat,
             question="What is diabetes?",
-            answer="Diabetes is a condition..."
+            answer="Diabetes is a condition...",
+            citation=[]
         )
 
         self.assertEqual(q.chat, self.chat)
@@ -61,7 +56,8 @@ class QuestionModelTests(TestCase):
             user=self.user,
             chat=self.chat,
             question="Hello",
-            answer="Hi"
+            answer="Hi",
+            citation=[]
         )
 
         self.assertEqual(q.chat.id, self.chat.id)
@@ -76,23 +72,31 @@ class ChatHistoryViewTests(TestCase):
             password="testpass123"
         )
 
-        self.chat = Chat.objects.create(user=self.user, chat_number=1)
+        self.chat = Chat.objects.create(user=self.user)
 
         Question.objects.create(
             user=self.user,
             chat=self.chat,
             question="What is diabetes?",
-            answer="A disease..."
+            answer="A disease...",
+            citation=[]
         )
 
     def test_chat_history_requires_login(self):
         response = self.client.get("/api/history/")
         self.assertEqual(response.status_code, 302)
 
+    def test_chat_history_with_chat_id(self):
+        self.client.login(username="testuser", password="testpass123")
+        
+        response = self.client.get(f"/api/history/?chat_id={self.chat.id}")
+
+        self.assertEqual(response.status_code, 200)
+
     def test_chat_history_returns_data(self):
         self.client.login(username="testuser", password="testpass123")
 
-        response = self.client.get("/api/history/")
+        response = self.client.get(f"/api/history/?chat_id={self.chat.id}")
 
         self.assertEqual(response.status_code, 200)
 
@@ -111,10 +115,7 @@ class ChatIntegrationTests(TestCase):
             username="testuser",
             password="testpass123"
         )
-        self.chat = Chat.objects.create(
-            user=self.user,
-            chat_number=1
-        )
+        self.chat = Chat.objects.create(user=self.user)
     
     @patch("core.views.requests.post")
     def test_full_chat_flow(self, mock_post):
@@ -135,6 +136,13 @@ class ChatIntegrationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        history = self.client.get("/api/history/")
+        response_data = response.json()
+        chat_id = response_data.get("chat_id")
+        
+        self.assertIsNotNone(chat_id)
+        self.assertEqual(Chat.objects.count(), 2)
+        self.assertEqual(Question.objects.count(), 1)
+
+        history = self.client.get(f"/api/history/?chat_id={chat_id}")
 
         self.assertEqual(history.status_code, 200)
