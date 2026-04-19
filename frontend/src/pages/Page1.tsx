@@ -174,7 +174,7 @@ const Page1 = () => {
       const data = await res.json();
 
       const currentChatId =
-        data.chat_number !== undefined ? data.chat_number : activeChatId;
+        data.chat_id !== undefined ? data.chat_id : activeChatId;
 
       if (currentChatId !== null && currentChatId !== undefined) {
         setActiveChatId(currentChatId);
