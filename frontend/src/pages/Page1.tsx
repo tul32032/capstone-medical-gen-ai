@@ -8,22 +8,26 @@ const quickPrompts = [
   {
     title: "Check Symptoms",
     description: "Understand common diabetes symptoms",
-    prompt: "What are the common symptoms of diabetes?"
+    prompt: "What are the common symptoms of diabetes?",
+    icon: "fa-solid fa-stethoscope"
   },
   {
     title: "Blood Sugar Guide",
     description: "View normal ranges and what your levels may mean",
-    prompt: "What are normal blood sugar ranges?"
+    prompt: "What are normal blood sugar ranges?",
+    icon: "fa-solid fa-chart-column"
   },
   {
     title: "Diet Recommendations",
-    description: "Get food suggestions and meal guidance for diabetes",
-    prompt: "What foods are recommended for someone with diabetes?"
+    description: "Get food suggestions and meal guidance for diabetes?",
+    prompt: "What foods are recommended for someone with diabetes?",
+    icon: "fa-solid fa-bowl-food"
   },
   {
     title: "Title Later",
     description: "Paragraph later",
-    prompt: "Give me general diabetes management advice."
+    prompt: "Give me general diabetes management advice.",
+    icon: "fa-solid fa-clipboard-check"
   }
 ];
 
@@ -50,12 +54,14 @@ const cleanAssistantText = (text: string) => {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 };
+
 const Page1 = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const [loading, setLoading] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
+  const [activeChatId, setActiveChatId] = useState<number | null>(null);
 
   useEffect(() => {
     const activeChat = JSON.parse(
@@ -63,42 +69,70 @@ const Page1 = () => {
     );
 
     if (activeChat) {
-      setMessages([
-        { role: "user", text: activeChat.prompt },
-        {
-          role: "assistant",
-          text: activeChat.reply,
-          citations: activeChat.citations || []
-        }
-      ]);
+      if (activeChat.messages) {
+        setMessages(activeChat.messages);
+      } else {
+        setMessages([
+          { role: "user", text: activeChat.prompt },
+          {
+            role: "assistant",
+            text: activeChat.reply,
+            citations: activeChat.citations || []
+          }
+        ]);
+      }
       setHasStartedChat(true);
+      setActiveChatId(activeChat.id);
     } else {
       setMessages([]);
       setHasStartedChat(false);
+      setActiveChatId(null);
     }
   }, []);
 
   const saveChatToHistory = (
+    chatId: number,
     prompt: string,
     reply: string,
-    citations: Citation[] = []
+    citations: Citation[] = [],
+    allMessages: Message[] = []
   ) => {
     const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
 
-    const newChat = {
-      id: Date.now(),
-      prompt,
-      reply,
-      citations,
-      createdAt: new Date().toLocaleString(),
-    };
+    const existingIndex = existing.findIndex((chat: any) => chat.id === chatId);
 
-    localStorage.setItem(
-      "betesbot_history",
-      JSON.stringify([newChat, ...existing])
-    );
+    if (existingIndex !== -1) {
+      const updatedChat = {
+        ...existing[existingIndex],
+        prompt: existing[existingIndex].prompt || prompt,
+        reply,
+        citations,
+        messages: allMessages,
+        createdAt: new Date().toLocaleString(),
+      };
 
-    localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
+      existing[existingIndex] = updatedChat;
+      localStorage.setItem("betesbot_history", JSON.stringify(existing));
+      localStorage.setItem("betesbot_active_chat", JSON.stringify(updatedChat));
+    } else {
+      const newChat = {
+        id: chatId,
+        prompt,
+        reply,
+        citations,
+        messages: allMessages,
+        createdAt: new Date().toLocaleString(),
+      };
+
+      localStorage.setItem(
+        "betesbot_history",
+        JSON.stringify([newChat, ...existing])
+      );
+
+      localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
+    }
+
+    window.dispatchEvent(new Event("betesbot-history-updated"));
   };
 
   const handleStop = () => {
@@ -127,7 +161,10 @@ const Page1 = () => {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: finalMessage }),
+        body: JSON.stringify({
+          message: finalMessage,
+          chat_id: activeChatId
+        }),
         signal: abortController.signal,
       });
 
@@ -136,7 +173,13 @@ const Page1 = () => {
       }
 
       const data = await res.json();
-      console.log("API response:", data);
+
+      const currentChatId =
+        data.chat_id !== undefined ? data.chat_id : activeChatId;
+
+      if (currentChatId !== null && currentChatId !== undefined) {
+        setActiveChatId(currentChatId);
+      }
 
       const rawAssistantText =
         data.answer ||
@@ -153,21 +196,32 @@ const Page1 = () => {
         data.references ||
         [];
 
-      setMessages((prev) =>
-        prev.map((msg, index) =>
+      setMessages((prev) => {
+        const updatedMessages = prev.map((msg, index) =>
           index === prev.length - 1 &&
           msg.role === "assistant" &&
           msg.text === "__loading__"
             ? {
-                role: "assistant",
+                role: "assistant" as const,
                 text: assistantText,
                 citations: assistantCitations
               }
             : msg
-        )
-      );
+        );
 
-      saveChatToHistory(finalMessage, assistantText, assistantCitations);
+        if (currentChatId !== null && currentChatId !== undefined) {
+          saveChatToHistory(
+            currentChatId,
+            finalMessage,
+            assistantText,
+            assistantCitations,
+            updatedMessages
+          );
+        }
+
+        return updatedMessages;
+      });
+
     } catch (err) {
       const error = err as Error;
       const errorMessage = "Error: " + error.message;
@@ -203,10 +257,17 @@ const Page1 = () => {
               onClick={() => handleSend(item.prompt)}
               disabled={loading}
             >
-              <span className="quick-action-title">{item.title}</span>
-              <span className="quick-action-description">
-                {item.description}
-              </span>
+              <div className="quick-action-top">
+                <div className="quick-action-icon-wrap">
+                  <i className={item.icon}></i>
+                </div>
+                <div className="quick-action-text">
+                  <span className="quick-action-title">{item.title}</span>
+                  <span className="quick-action-description">
+                    {item.description}
+                  </span>
+                </div>
+              </div>
             </button>
           ))}
         </div>
@@ -263,11 +324,7 @@ const Page1 = () => {
         </div>
       )}
 
-      <div
-        className={`chat-input-container ${
-          hasStartedChat ? "chat-input-after-send" : ""
-        }`}
-      >
+      <div className={`chat-input-container ${hasStartedChat ? "chat-input-after-send" : ""}`}>
         <input
           type="text"
           placeholder="Type your question..."
@@ -276,11 +333,8 @@ const Page1 = () => {
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              if (loading) {
-                handleStop();
-              } else {
-                handleSend();
-              }
+              if (loading) handleStop();
+              else handleSend();
             }
           }}
           className="chat-input"
@@ -290,13 +344,13 @@ const Page1 = () => {
           onClick={loading ? handleStop : () => handleSend()}
           className="send-btn"
         >
-          {loading ? (
-            <i className="fa-solid fa-square"></i>
-          ) : (
-            <i className="fa-solid fa-arrow-up"></i>
-          )}
+          {loading ? <i className="fa-solid fa-square"></i> : <i className="fa-solid fa-arrow-up"></i>}
         </button>
       </div>
+
+      <p className="chat-disclaimer">
+        For educational use only. This chatbot does not provide professional medical advice.
+      </p>
     </div>
   );
 };
