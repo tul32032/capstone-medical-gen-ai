@@ -18,7 +18,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 import { useAuth } from './context/AuthContext';
-import logo from './assets/BB2.png';
+import logo from './assets/Betesbotlogo.png';
 
 type ChatHistoryItem = {
   id: number;
