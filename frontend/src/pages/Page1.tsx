@@ -86,6 +86,7 @@ const Page1 = () => {
     } else {
       setMessages([]);
       setHasStartedChat(false);
+      setActiveChatId(null);
     }
   }, []);
 
