@@ -94,7 +94,7 @@ DATABASES = {
         "NAME": os.getenv("DATABASE_NAME", "postgres"),
         "USER": os.getenv("DATABASE_USERNAME", "postgres"),
         "PASSWORD": os.getenv("DATABASE_PASSWORD", "postgres"),
-        "HOST": os.getenv("DATABASE_HOST", "pgdb"),
+        "HOST": os.getenv("DATABASE_HOST", "127.0.0.1"),
         "PORT": os.getenv("DATABASE_PORT", 5432),
     }
 }

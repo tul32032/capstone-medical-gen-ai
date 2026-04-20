@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from core.models import Chat, Question
+from .models import Chat, Question
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -59,11 +59,13 @@ class ChatProxyView(APIView):
 
         user = request.user
 
-        chat = get_or_create_chat(user, chat_id)
+        if chat_id:
+            chat = Chat.objects.filter(user=user, id=chat_id).first()
         if not chat:
-            return JsonResponse(
-                {"error": "Missing required field: chat"}, status=400
-            )
+            chat = Chat.objects.create(user=user)
+        else:
+            chat = Chat.objects.create(user=user)
+
 
         try:
             response = requests.post(
@@ -209,16 +211,3 @@ class ChatHistoryView(LoginRequiredMixin, View):
             "chat_id": chat.id,
             "chat": data
         }, status=200)
-
-
-def get_or_create_chat(user, chat_id=None):
-    if not user:
-        raise ValueError("User is required")
-
-    if chat_id:
-        try:
-            return Chat.objects.get(user=user, id=chat_id)
-        except Chat.DoesNotExist:
-            pass
-
-    return Chat.objects.create(user=user)

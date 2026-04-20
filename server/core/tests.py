@@ -24,10 +24,6 @@ class ChatCreationTests(TestCase):
         self.assertEqual(chat.user, self.user)
         self.assertIsNotNone(chat.id)
 
-    def test_get_or_create_new_chat(self):
-        chat = Chat.objects.create(user=self.user)
-
-        self.assertIsNotNone(chat.id)
 
 class QuestionModelTests(TestCase):
 
