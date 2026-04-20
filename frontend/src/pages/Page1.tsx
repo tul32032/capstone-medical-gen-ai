@@ -346,6 +346,10 @@ const Page1 = () => {
           {loading ? <i className="fa-solid fa-square"></i> : <i className="fa-solid fa-arrow-up"></i>}
         </button>
       </div>
+
+      <p className="chat-disclaimer">
+        For educational use only. This chatbot does not provide professional medical advice.
+      </p>
     </div>
   );
 };
