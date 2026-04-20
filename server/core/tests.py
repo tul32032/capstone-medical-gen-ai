@@ -146,3 +146,65 @@ class ChatIntegrationTests(TestCase):
         history = self.client.get(f"/api/history/?chat_id={chat_id}")
 
         self.assertEqual(history.status_code, 200)
+
+class ChatProxyViewTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass"
+        )
+
+    @patch("core.views.requests.post")
+    def test_chat_creates_database_records(self, mock_post):
+        self.client.force_authenticate(user=self.user)
+        
+        mock_post.return_value.json.return_value = {
+        "answer": "Test answer",
+        "citations": []
+        }
+        mock_post.return_value.status_code = 200
+
+        
+        response = self.client.post(
+            "/api/chat/",  # adjust to your URL
+            data={
+                "message": "hello test",
+                "chat_id": None
+            },
+            content_type="application/json"
+        )
+
+        # 1. Check response
+        self.assertEqual(response.status_code, 200)
+
+        # 2. Check DB state
+        self.assertEqual(Chat.objects.count(), 1)
+        self.assertEqual(Question.objects.count(), 1)
+
+        q = Question.objects.first()
+        self.assertEqual(q.question, "hello test")
+
+    @patch("core.views.requests.post")
+    def test_chat_relationship(self, mock_post):
+        self.client.force_authenticate(user=self.user)
+
+        mock_post.return_value.json.return_value = {
+        "answer": "Test answer",
+        "citations": []
+        }
+        mock_post.return_value.status_code = 200
+
+        response = self.client.post(
+            "/api/chat/",
+            data=json.dumps({"message": "hello"}),
+            content_type="application/json"
+        )
+
+        chat = Chat.objects.first()
+        question = Question.objects.first()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(question.chat, chat)
+        self.assertEqual(question.user, self.user)
