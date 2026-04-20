@@ -1,5 +1,5 @@
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Page1 from './pages/Page1';
 import Page2 from './pages/Page2';
 import Page3 from './pages/Page3';
@@ -13,6 +13,8 @@ import {
   faCircleUser,
   faArrowRightFromBracket,
   faChartLine,
+  faTrashCan,
+  faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 
 import { useAuth } from './context/AuthContext';
@@ -29,6 +31,7 @@ const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [history, setHistory] = useState<ChatHistoryItem[]>([]);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
@@ -57,8 +60,26 @@ const Dashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+    setOpenMenuId(null);
   };
 
   const handleLogout = async () => {
@@ -167,7 +188,11 @@ ${chat.reply}`;
 
               <div className="history-sidebar-list">
                 {history.slice(0, 8).map((chat) => (
-                  <div key={chat.id} className="history-sidebar-row">
+                  <div
+                    key={chat.id}
+                    className="history-sidebar-row"
+                    ref={openMenuId === chat.id ? menuRef : null}
+                  >
                     <button
                       type="button"
                       className="history-sidebar-item"
@@ -192,7 +217,12 @@ ${chat.reply}`;
                         <button
                           type="button"
                           onClick={() => handleExport(chat)}
+                          className="menu-option"
                         >
+                          <FontAwesomeIcon
+                            icon={faDownload}
+                            style={{ marginRight: "6px" }}
+                          />
                           Export
                         </button>
 
@@ -201,6 +231,10 @@ ${chat.reply}`;
                           onClick={() => handleDelete(chat.id)}
                           className="delete-option"
                         >
+                          <FontAwesomeIcon
+                            icon={faTrashCan}
+                            style={{ marginRight: "6px", color: "red" }}
+                          />
                           Delete
                         </button>
                       </div>
