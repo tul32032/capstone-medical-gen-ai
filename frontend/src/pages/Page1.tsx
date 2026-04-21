@@ -9,26 +9,26 @@ const quickPrompts = [
     title: "Check Symptoms",
     description: "Understand common diabetes symptoms",
     prompt: "What are the common symptoms of diabetes?",
-    icon: "fa-solid fa-stethoscope"
+    icon: "fa-solid fa-stethoscope",
   },
   {
     title: "Blood Sugar Guide",
     description: "View normal ranges and what your levels may mean",
     prompt: "What are normal blood sugar ranges?",
-    icon: "fa-solid fa-chart-column"
+    icon: "fa-solid fa-chart-column",
   },
   {
     title: "Diet Recommendations",
     description: "Get food suggestions and meal guidance for diabetes?",
     prompt: "What foods are recommended for someone with diabetes?",
-    icon: "fa-solid fa-bowl-food"
+    icon: "fa-solid fa-bowl-food",
   },
   {
     title: "Title Later",
     description: "Paragraph later",
     prompt: "Give me general diabetes management advice.",
-    icon: "fa-solid fa-clipboard-check"
-  }
+    icon: "fa-solid fa-clipboard-check",
+  },
 ];
 
 type Citation =
@@ -41,12 +41,10 @@ type Message = {
   citations?: Citation[];
 };
 
-const cleanAssistantText = (text: string) => {
-  return text
+const formatAssistantText = (input: string) => {
+  return input
     .replace(/^Brief Answer:\s*/gim, "")
-    .replace(/^Brief answer:\s*/gim, "")
     .replace(/^Detailed Explanation:\s*/gim, "")
-    .replace(/^Detailed explanation:\s*/gim, "")
     .replace(/^References:\s*/gim, "")
     .replace(/^\[\d+\]\s.*$/gm, "")
     .replace(/\[Source:[^\]]*\]/gi, "")
@@ -56,206 +54,195 @@ const cleanAssistantText = (text: string) => {
 };
 
 const Page1 = () => {
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [hasStartedChat, setHasStartedChat] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const controllerRef = useRef<AbortController | null>(null);
-  const [activeChatId, setActiveChatId] = useState<number | null>(null);
+  const [input, setInput] = useState("");
+  const [chat, setChat] = useState<Message[]>([]);
+  const [started, setStarted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatId, setChatId] = useState<number | null>(null);
+
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const activeChat = JSON.parse(
+    const stored = JSON.parse(
       localStorage.getItem("betesbot_active_chat") || "null"
     );
 
-    if (activeChat) {
-      if (activeChat.messages) {
-        setMessages(activeChat.messages);
+    if (stored) {
+      if (stored.messages) {
+        setChat(stored.messages);
       } else {
-        setMessages([
-          { role: "user", text: activeChat.prompt },
+        setChat([
+          { role: "user", text: stored.prompt },
           {
             role: "assistant",
-            text: activeChat.reply,
-            citations: activeChat.citations || []
-          }
+            text: stored.reply,
+            citations: stored.citations || [],
+          },
         ]);
       }
-      setHasStartedChat(true);
-      setActiveChatId(activeChat.id);
+      setStarted(true);
+      setChatId(stored.id);
     } else {
-      setMessages([]);
-      setHasStartedChat(false);
-      setActiveChatId(null);
+      setChat([]);
+      setStarted(false);
+      setChatId(null);
     }
   }, []);
 
-  const saveChatToHistory = (
-    chatId: number,
+  const updateHistory = (
+    id: number,
     prompt: string,
     reply: string,
     citations: Citation[] = [],
-    allMessages: Message[] = []
+    messages: Message[] = []
   ) => {
     const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
+    const index = existing.findIndex((c: any) => c.id === id);
 
-    const existingIndex = existing.findIndex((chat: any) => chat.id === chatId);
+    const updated = {
+      id,
+      prompt,
+      reply,
+      citations,
+      messages,
+      createdAt: new Date().toLocaleString(),
+    };
 
-    if (existingIndex !== -1) {
-      const updatedChat = {
-        ...existing[existingIndex],
-        prompt: existing[existingIndex].prompt || prompt,
-        reply,
-        citations,
-        messages: allMessages,
-        createdAt: new Date().toLocaleString(),
+    if (index !== -1) {
+      existing[index] = {
+        ...existing[index],
+        ...updated,
+        prompt: existing[index].prompt || prompt,
       };
-
-      existing[existingIndex] = updatedChat;
       localStorage.setItem("betesbot_history", JSON.stringify(existing));
-      localStorage.setItem("betesbot_active_chat", JSON.stringify(updatedChat));
     } else {
-      const newChat = {
-        id: chatId,
-        prompt,
-        reply,
-        citations,
-        messages: allMessages,
-        createdAt: new Date().toLocaleString(),
-      };
-
       localStorage.setItem(
         "betesbot_history",
-        JSON.stringify([newChat, ...existing])
+        JSON.stringify([updated, ...existing])
       );
-
-      localStorage.setItem("betesbot_active_chat", JSON.stringify(newChat));
     }
 
+    localStorage.setItem("betesbot_active_chat", JSON.stringify(updated));
     window.dispatchEvent(new Event("betesbot-history-updated"));
   };
 
-  const handleStop = () => {
-    controllerRef.current?.abort();
-    controllerRef.current = null;
+  const stopRequest = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
   };
 
-  const handleSend = async (customMessage?: string) => {
-    const finalMessage = customMessage ?? message;
-    if (!finalMessage.trim() || loading) return;
+  const sendMessage = async (custom?: string) => {
+    const textToSend = custom ?? input;
+    if (!textToSend.trim() || isLoading) return;
 
-    const abortController = new AbortController();
-    controllerRef.current = abortController;
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-    setLoading(true);
-    setHasStartedChat(true);
+    setIsLoading(true);
+    setStarted(true);
 
-    setMessages((prev) => [
+    setChat((prev) => [
       ...prev,
-      { role: "user", text: finalMessage },
-      { role: "assistant", text: "__loading__" }
+      { role: "user", text: textToSend },
+      { role: "assistant", text: "__loading__" },
     ]);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/chat/`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat/`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: finalMessage,
-          chat_id: activeChatId
+          message: textToSend,
+          chat_id: chatId,
         }),
-        signal: abortController.signal,
+        signal: controller.signal,
       });
 
-      if (!res.ok) {
-        throw new Error(`Request failed with status ${res.status}`);
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
       }
 
-      const data = await res.json();
+      const data = await response.json();
 
-      const currentChatId =
-        data.chat_id !== undefined ? data.chat_id : activeChatId;
+      const newChatId =
+        data.chat_id !== undefined ? data.chat_id : chatId;
 
-      if (currentChatId !== null && currentChatId !== undefined) {
-        setActiveChatId(currentChatId);
+      if (newChatId !== null && newChatId !== undefined) {
+        setChatId(newChatId);
       }
 
-      const rawAssistantText =
+      const rawText =
         data.answer ||
         data.response ||
         data.message ||
         data.reply ||
         "No response returned from server.";
 
-      const assistantText = cleanAssistantText(rawAssistantText);
+      const cleaned = formatAssistantText(rawText);
 
-      const assistantCitations =
+      const cites =
         data.citations ||
         data.sources ||
         data.references ||
         [];
 
-      setMessages((prev) => {
-        const updatedMessages = prev.map((msg, index) =>
-          index === prev.length - 1 &&
+      setChat((prev) => {
+        const updatedMessages = prev.map((msg, i) =>
+          i === prev.length - 1 &&
           msg.role === "assistant" &&
           msg.text === "__loading__"
             ? {
                 role: "assistant" as const,
-                text: assistantText,
-                citations: assistantCitations
+                text: cleaned,
+                citations: cites,
               }
             : msg
         );
 
-        if (currentChatId !== null && currentChatId !== undefined) {
-          saveChatToHistory(
-            currentChatId,
-            finalMessage,
-            assistantText,
-            assistantCitations,
+        if (newChatId !== null && newChatId !== undefined) {
+          updateHistory(
+            newChatId,
+            textToSend,
+            cleaned,
+            cites,
             updatedMessages
           );
         }
 
         return updatedMessages;
       });
-
     } catch (err) {
       const error = err as Error;
-      const errorMessage = "Error: " + error.message;
 
-      setMessages((prev) =>
-        prev.map((msg, index) =>
-          index === prev.length - 1 &&
+      setChat((prev) =>
+        prev.map((msg, i) =>
+          i === prev.length - 1 &&
           msg.role === "assistant" &&
           msg.text === "__loading__"
-            ? { role: "assistant", text: errorMessage }
+            ? { role: "assistant", text: "Error: " + error.message }
             : msg
         )
       );
     } finally {
-      controllerRef.current = null;
-      setLoading(false);
-      setMessage("");
+      abortRef.current = null;
+      setIsLoading(false);
+      setInput("");
     }
   };
 
   return (
     <div className="chat-container">
-      {!hasStartedChat && (
-        <h1 className="page-title">Ask about diabetes!</h1>
-      )}
+      {!started && <h1 className="page-title">Ask about diabetes!</h1>}
 
-      {!hasStartedChat && (
+      {!started && (
         <div className="quick-actions">
           {quickPrompts.map((item) => (
             <button
               key={item.title}
               className="quick-action-card"
-              onClick={() => handleSend(item.prompt)}
-              disabled={loading}
+              onClick={() => sendMessage(item.prompt)}
+              disabled={isLoading}
             >
               <div className="quick-action-top">
                 <div className="quick-action-icon-wrap">
@@ -273,15 +260,15 @@ const Page1 = () => {
         </div>
       )}
 
-      {hasStartedChat && (
+      {started && (
         <div className="chat-thread">
-          {messages.map((msg, index) =>
+          {chat.map((msg, i) =>
             msg.role === "user" ? (
-              <div key={index} className="user-message-row">
+              <div key={i} className="user-message-row">
                 <div className="user-message-bubble">{msg.text}</div>
               </div>
             ) : (
-              <div key={index} className="assistant-message-row">
+              <div key={i} className="assistant-message-row">
                 <div className="assistant-message-bubble">
                   {msg.text === "__loading__" ? (
                     <div className="loader"></div>
@@ -295,21 +282,21 @@ const Page1 = () => {
                         <div className="citations">
                           <h3 className="citations-title">References</h3>
                           <ul className="citations-list">
-                            {msg.citations.map((cite, i) => (
-                              <li key={i}>
-                                {typeof cite === "string"
-                                  ? cite
-                                  : cite.url ? (
-                                      <a
-                                        href={cite.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        {cite.source ?? cite.url}
-                                      </a>
-                                    ) : (
-                                      cite.source ?? JSON.stringify(cite)
-                                    )}
+                            {msg.citations.map((c, idx) => (
+                              <li key={idx}>
+                                {typeof c === "string" ? (
+                                  c
+                                ) : c.url ? (
+                                  <a
+                                    href={c.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    {c.source ?? c.url}
+                                  </a>
+                                ) : (
+                                  c.source ?? JSON.stringify(c)
+                                )}
                               </li>
                             ))}
                           </ul>
@@ -324,33 +311,42 @@ const Page1 = () => {
         </div>
       )}
 
-      <div className={`chat-input-container ${hasStartedChat ? "chat-input-after-send" : ""}`}>
+      <div
+        className={`chat-input-container ${
+          started ? "chat-input-after-send" : ""
+        }`}
+      >
         <input
           type="text"
           placeholder="Type your question..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              if (loading) handleStop();
-              else handleSend();
+              if (isLoading) stopRequest();
+              else sendMessage();
             }
           }}
           className="chat-input"
         />
 
         <button
-          onClick={loading ? handleStop : () => handleSend()}
+          onClick={isLoading ? stopRequest : () => sendMessage()}
           className="send-btn"
         >
-          {loading ? <i className="fa-solid fa-square"></i> : <i className="fa-solid fa-arrow-up"></i>}
+          {isLoading ? (
+            <i className="fa-solid fa-square"></i>
+          ) : (
+            <i className="fa-solid fa-arrow-up"></i>
+          )}
         </button>
       </div>
 
-      {!hasStartedChat && (
+      {!started && (
         <p className="chat-disclaimer">
-          For educational use only. This chatbot does not provide professional medical advice.
+          For educational use only. This chatbot does not provide professional
+          medical advice.
         </p>
       )}
     </div>
