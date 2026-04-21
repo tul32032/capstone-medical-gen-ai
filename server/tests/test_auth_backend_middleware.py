@@ -1,16 +1,23 @@
+from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
 
-import jwt
 import pytest
 from django.http import HttpResponse
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework_simplejwt.tokens import AccessToken
 
 from authentication.backends import JWTCookieAuthentication
 from authentication.constants import ACCESS_TOKEN_COOKIE
 from authentication.middleware import JWTRefreshCookieMiddleware
 from authentication.models import User
 from authentication.utils import generate_tokens_for_user
+
+
+def make_expired_access_token(user):
+    token = AccessToken.for_user(user)
+    token.set_exp(lifetime=timedelta(seconds=-1))
+    return str(token)
 
 
 def test_authenticate_returns_none_without_cookie():
@@ -48,7 +55,7 @@ def test_try_refresh_requires_google_refresh_token():
         email="expired@example.com",
         password="password123",
     )
-    expired_token = jwt.encode({"user_id": user.id}, "unused-secret", algorithm="HS256")
+    expired_token = make_expired_access_token(user)
     request = SimpleNamespace()
 
     with pytest.raises(AuthenticationFailed, match="Session expired"):
@@ -62,7 +69,7 @@ def test_try_refresh_clears_stale_google_refresh_token():
         password="password123",
         google_refresh_token="old-refresh-token",
     )
-    expired_token = jwt.encode({"user_id": user.id}, "unused-secret", algorithm="HS256")
+    expired_token = make_expired_access_token(user)
     request = SimpleNamespace()
 
     with patch(
@@ -85,7 +92,7 @@ def test_try_refresh_issues_new_access_token_and_updates_profile():
         last_name="Name",
         google_refresh_token="refresh-token",
     )
-    expired_token = jwt.encode({"user_id": user.id}, "unused-secret", algorithm="HS256")
+    expired_token = make_expired_access_token(user)
     request = SimpleNamespace()
     fresh_access_token, _ = generate_tokens_for_user(user)
 

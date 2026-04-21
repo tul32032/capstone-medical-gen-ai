@@ -1,7 +1,8 @@
-from .settings import *  # noqa: F403
+__test__ = False
+from betesbot.settings import *  # noqa: F403
 
 
-SECRET_KEY = SECRET_KEY or "test-secret-key"
+SECRET_KEY = SECRET_KEY or "test-secret-key-at-least-32-bytes-long"
 DEBUG = True
 ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1"]
 

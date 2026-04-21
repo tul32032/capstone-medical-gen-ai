@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.test import Client
 
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "betesbot.test_settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "betesbot.pytest_settings")
 os.environ["DEBUG"] = "1"
 
 
