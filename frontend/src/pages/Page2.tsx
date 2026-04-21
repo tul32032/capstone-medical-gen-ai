@@ -97,8 +97,6 @@ const Page2 = () => {
     e.target.value = "";
   };
 
-  const recentUploads = files;
-
   return (
     <div className="library-container">
       <div className="library-header">
@@ -191,59 +189,6 @@ const Page2 = () => {
             </div>
           )}
         </div>
-      </div>
-
-      <div className="recent-uploads-section">
-        <div className="recent-uploads-header">
-          <h2>Recent Uploads</h2>
-        </div>
-
-        {recentUploads.length === 0 ? (
-          <div className="recent-uploads-empty">
-            <p>No recent uploads yet.</p>
-          </div>
-        ) : (
-          <div className="recent-uploads-table">
-            <div className="recent-uploads-table-head">
-              <span>Name</span>
-              <span>Status</span>
-              <span>Type</span>
-            </div>
-
-            {recentUploads.map((file) => {
-              const fileType = file.name.toLowerCase().endsWith(".pdf") ? "PDF" : "TXT";
-
-              return (
-                <div key={file.id} className="recent-upload-row">
-                  <div className="recent-upload-name">
-                    <FontAwesomeIcon icon={faFileLines} className="recent-upload-file-icon" />
-                    <span>{file.name}</span>
-                  </div>
-
-                  <div className="recent-upload-status">
-                    <span
-                      className={`recent-status-pill ${
-                        file.status === "success"
-                          ? "recent-status-pill--success"
-                          : file.status === "error"
-                          ? "recent-status-pill--error"
-                          : "recent-status-pill--uploading"
-                      }`}
-                    >
-                      {file.status === "success"
-                        ? "Uploaded"
-                        : file.status === "error"
-                        ? "Failed"
-                        : "Uploading"}
-                    </span>
-                  </div>
-
-                  <div className="recent-upload-type">{fileType}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );

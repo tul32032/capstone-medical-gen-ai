@@ -1,7 +1,7 @@
 .library-container {
   width: 100%;
   min-height: 100vh;
-  padding: 28px 48px 32px;
+  padding: 50px 48px 32px;
   box-sizing: border-box;
   background: transparent;
 }
@@ -46,7 +46,7 @@
 }
 
 .upload-box {
-  width: 100%;
+  width: 90%;
   min-height: 310px;
   border: 2px dashed #cad5eb;
   border-radius: 18px;
@@ -110,7 +110,7 @@
 
 .files-panel {
   padding-top: 6px;
-  padding-left: 20px;
+  padding-left: 18px;
 }
 
 .files-panel-header {
@@ -134,7 +134,7 @@
 }
 
 .file-card {
-  width: 220px;
+  width: 210px;
   min-height: 150px;
   height: 220px;
   background: white;
@@ -235,123 +235,6 @@
   max-width: 240px;
 }
 
-.recent-uploads-table-head {
-display: grid;
-grid-template-columns: 2fr 1fr 100px;
-align-items: center;
-gap: 16px;
-}
-.recent-upload-row {
-display: grid;
-grid-template-columns: 2fr 1fr 100px;
-align-items: center;
-gap: 16px;
-}
-
-.recent-uploads-section {
-  margin-top: 34px;
-}
-
-.recent-uploads-header {
-  margin-bottom: 16px;
-}
-
-.recent-uploads-header h2 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 500;
-  color: rgb(65, 73, 81);
-}
-
-.recent-uploads-empty {
-  min-height: 120px;
-  border: 1px solid #dbe5f5;
-  border-radius: 16px;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #7a869b;
-  font-size: 16px;
-}
-
-.recent-uploads-table {
-  width: 100%;
-  background: white;
-  border: 1px solid #dbe5f5;
-  border-radius: 16px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 420px;
-}
-
-.recent-uploads-table-head {
-  padding: 16px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #586885;
-  border-bottom: 1px solid #e5ebf6;
-  background: #fcfdff;
-}
-
-.recent-upload-row {
-  padding: 16px 20px;
-  border-bottom: 1px solid #edf2fa;
-}
-
-.recent-upload-row:last-child {
-  border-bottom: 1px solid #edf2fa;
-}
-
-.recent-upload-name {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.recent-upload-file-icon {
-  color: #4c73cb;
-  font-size: 18px;
-}
-
-.recent-upload-name span {
-  font-size: 14px;
-  color: #2b3545;
-  font-weight: 500;
-}
-
-.recent-upload-status {
-  display: flex;
-  align-items: center;
-}
-
-.recent-status-pill {
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.recent-status-pill--success {
-  background: #e9f8f0;
-  color: #21915c;
-}
-
-.recent-status-pill--error {
-  background: #fdeeee;
-  color: #d94b4b;
-}
-
-.recent-status-pill--uploading {
-  background: #edf3ff;
-  color: #4770c1;
-}
-
-.recent-upload-type {
-  font-size: 13px;
-  font-weight: 600;
-  color: #6a7893;
-}
 .upload-summary {
 margin-top: 20px;
 padding-top: 14px;

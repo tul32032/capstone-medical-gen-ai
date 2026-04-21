@@ -348,9 +348,11 @@ const Page1 = () => {
         </button>
       </div>
 
-      <p className="chat-disclaimer">
-        For educational use only. This chatbot does not provide professional medical advice.
-      </p>
+      {!hasStartedChat && (
+        <p className="chat-disclaimer">
+          For educational use only. This chatbot does not provide professional medical advice.
+        </p>
+      )}
     </div>
   );
 };
