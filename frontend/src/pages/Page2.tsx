@@ -21,12 +21,9 @@ type UploadedDoc = {
 
 const Page2 = () => {
   const [files, setFiles] = useState<UploadedDoc[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    const selectedFiles = Array.from(e.target.files);
-
+  const uploadFiles = async (selectedFiles: File[]) => {
     for (const selectedFile of selectedFiles) {
       const uploadId = `${selectedFile.name}-${selectedFile.size}-${Date.now()}-${Math.random()
         .toString(36)
@@ -93,8 +90,44 @@ const Page2 = () => {
         );
       }
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return;
+
+    const selectedFiles = Array.from(e.target.files);
+    await uploadFiles(selectedFiles);
 
     e.target.value = "";
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const droppedFiles = Array.from(e.dataTransfer.files);
+
+    const validFiles = droppedFiles.filter(
+      (file) =>
+        file.type === "application/pdf" ||
+        file.type === "text/plain" ||
+        file.name.toLowerCase().endsWith(".pdf") ||
+        file.name.toLowerCase().endsWith(".txt")
+    );
+
+    if (validFiles.length === 0) return;
+
+    await uploadFiles(validFiles);
   };
 
   return (
@@ -108,7 +141,13 @@ const Page2 = () => {
 
       <div className="library-content">
         <div className="upload-panel">
-          <label htmlFor="fileUpload" className="upload-box">
+          <label
+            htmlFor="fileUpload"
+            className={`upload-box ${isDragging ? "drag-active" : ""}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <FontAwesomeIcon icon={faUpload} className="upload-main-icon" />
             <p className="upload-heading">Drag & drop files here</p>
             <span className="upload-button">Upload Documents</span>

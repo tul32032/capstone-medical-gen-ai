@@ -89,6 +89,10 @@
   text-align: center;
   line-height: 1.2;
 }
+.upload-box.drag-active {
+  border-color: #4770c1;
+  background: #eef4ff;
+}
 
 .upload-button {
   display: inline-flex;
