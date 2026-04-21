@@ -18,3 +18,30 @@ dependencies = [
     "pymupdf-layout==1.27.1",
     "pymupdf4llm==0.3.4",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-cov>=6.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "--strict-markers"
+
+[tool.coverage.run]
+source = [
+    "authentication",
+    "analytics",
+    "core",
+    "pdf_processing",
+]
+omit = [
+    "*/migrations/*",
+    "*/tests.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
