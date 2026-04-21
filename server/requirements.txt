@@ -1,0 +1,13 @@
+django>=5.0,<6.0
+django-cors-headers>=4.9.0
+djangorestframework>=3.16.1
+djangorestframework-simplejwt>=5.5.1
+google-auth>=2.49.1
+gunicorn>=25.1.0
+psycopg2-binary>=2.9.11
+python-dotenv>=1.2.2
+requests>=2.32.5
+pymupdf==1.27.1
+pymupdf-layout==1.27.1
+pymupdf4llm==0.3.4
+google-cloud-bigquery>=3.27.0

@@ -1,10 +1,19 @@
 import os
 import requests
+import json
 from pdf_processing.upload_ingest import ingest_uploaded_pdf
 from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Chat, Question
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from authentication.backends import JWTCookieAuthentication
@@ -41,12 +50,22 @@ class ChatProxyView(APIView):
             return JsonResponse({"error": "Invalid JSON body"}, status=400)
 
         message = body.get("message")
+        chat_id = body.get("chat_id")
+
         if not message:
             return JsonResponse(
                 {"error": "Missing required field: message"}, status=400
             )
 
         user = request.user
+
+        if chat_id:
+            chat = Chat.objects.filter(user=user, id=chat_id).first()
+            if not chat:
+                chat = Chat.objects.create(user=user)
+        else:
+            chat = Chat.objects.create(user=user)
+
 
         try:
             response = requests.post(
@@ -64,6 +83,7 @@ class ChatProxyView(APIView):
             )
             data = response.json()
             answer = data.get("answer", "")
+            citations = data.get("citations", [])
 
             Query.objects.create(
                 user=user,
@@ -71,13 +91,23 @@ class ChatProxyView(APIView):
                 answer=answer,
             )
 
+            Question.objects.create(
+                user=user,
+                chat=chat,
+                question=message,
+                answer=answer,
+                citation=citations
+            )   
+            
             return JsonResponse(
                 {
+                    "chat_id": chat.id,
                     "answer": answer,
                     "citations": data.get("citations", []),
                 },
-                status=response.status_code,
+                status=response.status_code
             )
+
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)
 
@@ -143,3 +173,41 @@ class UploadFile(View):
             )
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": str(e)}, status=502)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ChatHistoryView(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
+
+        chat_id = request.GET.get("chat_id")
+
+        if not chat_id:
+            return JsonResponse({"error": "chat_id is required"}, status=400)
+        
+        chat = Chat.objects.filter(user=user, id=chat_id).first()
+        
+        if not chat:
+            return JsonResponse({
+            "error": "Chat not found",
+            "chat_id": chat_id
+        }, status=404)
+
+        questions = Question.objects.filter(
+            user=user,
+            chat=chat
+        ).order_by('created_at')
+
+        data = []
+        for q in questions:
+            data.append({
+                "question": q.question,
+                "answer": q.answer,
+                "citation": q.citation,
+                "timestamp": q.created_at.isoformat()
+            })
+
+        return JsonResponse({
+            "chat_id": chat.id,
+            "chat": data
+        }, status=200)
