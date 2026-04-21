@@ -1,7 +1,7 @@
 .library-container {
   width: 100%;
   min-height: 100vh;
-  padding: 50px 48px 32px;
+  padding: 50px 48px 32px 90px;
   box-sizing: border-box;
   background: transparent;
 }
@@ -44,6 +44,12 @@
   padding: 0;
   box-sizing: border-box;
 }
+.files-panel{
+  padding-top: 6px;
+  padding-left: 0;
+  margin-left: -30px;
+}
+
 
 .upload-box {
   width: 90%;
@@ -82,6 +88,10 @@
   color: rgb(65, 73, 81);
   text-align: center;
   line-height: 1.2;
+}
+.upload-box.drag-active {
+  border-color: #4770c1;
+  background: #eef4ff;
 }
 
 .upload-button {
