@@ -259,16 +259,18 @@ ${chat.reply}`;
             </div>
           )}
 
-          {!collapsed && (
-            <div className="bottom-section">
-              <div className="user-section">
-                <div className="user-card">
-                  <FontAwesomeIcon icon={faCircleUser} className="nav-icon" />
+          <div className="bottom-section">
+            <div className="user-section">
+              <div className="user-card">
+                <FontAwesomeIcon icon={faCircleUser} className="nav-icon" />
 
+                {!collapsed && (
                   <div className="user-info">
                     <span className="user-name">{fullName}</span>
                   </div>
+                )}
 
+                {!collapsed && (
                   <button
                     type="button"
                     className="logout-icon-btn"
@@ -282,10 +284,10 @@ ${chat.reply}`;
                       className="logout-icon"
                     />
                   </button>
-                </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </nav>
       </aside>
 
