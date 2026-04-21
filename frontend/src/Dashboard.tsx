@@ -1,12 +1,14 @@
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
-import Page1 from './pages/Page1';
-import Page2 from './pages/Page2';
-import Page3 from './pages/Page3';
-import AdminAnalytics from './pages/AdminAnalytics';
-import './Dashboard.css';
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Page1 from "./pages/Page1";
+import Page2 from "./pages/Page2";
+import Page3 from "./pages/Page3";
+import AdminAnalytics from "./pages/AdminAnalytics";
+
+import "./Dashboard.css";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUserDoctor,
   faFileLines,
@@ -15,10 +17,10 @@ import {
   faChartLine,
   faTrashCan,
   faDownload,
-} from '@fortawesome/free-solid-svg-icons';
+} from "@fortawesome/free-solid-svg-icons";
 
-import { useAuth } from './context/AuthContext';
-import logo from './assets/Betesbotlogo.png';
+import { useAuth } from "./context/AuthContext";
+import logo from "./assets/Betesbotlogo.png";
 
 type ChatHistoryItem = {
   id: number;
@@ -29,94 +31,93 @@ type ChatHistoryItem = {
 
 const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [history, setHistory] = useState<ChatHistoryItem[]>([]);
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+  const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
+
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
 
   useEffect(() => {
-    const loadHistory = () => {
-      const saved = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
+    const fetchHistory = () => {
+      const raw = localStorage.getItem("betesbot_history");
+      const parsed = JSON.parse(raw || "[]");
 
-      const cleanedHistory = saved.filter(
-        (chat: ChatHistoryItem) =>
-          chat &&
-          typeof chat.prompt === "string" &&
-          chat.prompt.trim() !== "" &&
-          typeof chat.reply === "string" &&
-          chat.reply.trim() !== ""
+      const valid = parsed.filter(
+        (item: ChatHistoryItem) =>
+          item &&
+          typeof item.prompt === "string" &&
+          item.prompt.trim() !== "" &&
+          typeof item.reply === "string" &&
+          item.reply.trim() !== ""
       );
 
-      setHistory(cleanedHistory);
+      setChatHistory(valid);
     };
 
-    loadHistory();
-    window.addEventListener("betesbot-history-updated", loadHistory);
+    fetchHistory();
+    window.addEventListener("betesbot-history-updated", fetchHistory);
 
     return () => {
-      window.removeEventListener("betesbot-history-updated", loadHistory);
+      window.removeEventListener("betesbot-history-updated", fetchHistory);
     };
   }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
-        setOpenMenuId(null);
+    const closeMenuOnOutsideClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setActiveMenuId(null);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", closeMenuOnOutsideClick);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", closeMenuOnOutsideClick);
     };
   }, []);
 
   const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-    setOpenMenuId(null);
+    setCollapsed((prev) => !prev);
+    setActiveMenuId(null);
   };
 
-  const handleLogout = async () => {
+  const logoutUser = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
-  const handleNewChat = () => {
+  const startNewChat = () => {
     localStorage.removeItem("betesbot_active_chat");
-    navigate('/dashboard');
+    navigate("/dashboard");
     window.location.reload();
   };
 
-  const handleOpenChat = (chat: ChatHistoryItem) => {
+  const openChat = (chat: ChatHistoryItem) => {
     localStorage.setItem("betesbot_active_chat", JSON.stringify(chat));
-    navigate('/dashboard');
+    navigate("/dashboard");
     window.location.reload();
   };
 
-  const handleDelete = (chatId: number) => {
-    const updated = history.filter((chat) => chat.id !== chatId);
-    setHistory(updated);
-    localStorage.setItem("betesbot_history", JSON.stringify(updated));
+  const deleteChat = (id: number) => {
+    const updatedList = chatHistory.filter((c) => c.id !== id);
+    setChatHistory(updatedList);
+    localStorage.setItem("betesbot_history", JSON.stringify(updatedList));
 
-    const activeChat = JSON.parse(
+    const active = JSON.parse(
       localStorage.getItem("betesbot_active_chat") || "null"
     );
 
-    if (activeChat && activeChat.id === chatId) {
+    if (active && active.id === id) {
       localStorage.removeItem("betesbot_active_chat");
     }
 
-    setOpenMenuId(null);
+    setActiveMenuId(null);
   };
 
-  const handleExport = (chat: ChatHistoryItem) => {
-    const text = `BetesBot Chat Export
+  const exportChat = (chat: ChatHistoryItem) => {
+    const fileContent = `BetesBot Chat Export
 
 Date: ${chat.createdAt}
 
@@ -126,29 +127,36 @@ ${chat.prompt}
 Response:
 ${chat.reply}`;
 
-    const blob = new Blob([text], { type: "text/plain" });
+    const blob = new Blob([fileContent], { type: "text/plain" });
     const url = window.URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `betesbot-chat-${chat.id}.txt`;
-    link.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `betesbot-chat-${chat.id}.txt`;
+    a.click();
 
     window.URL.revokeObjectURL(url);
-    setOpenMenuId(null);
+    setActiveMenuId(null);
   };
 
-  const fullName =
-    user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : 'Your Name';
+  const fullName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Your Name";
 
   return (
     <div className="dashboard-container">
-      <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+      <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
-          {!collapsed && <img src={logo} alt="Logo" className="sidebar-logo" />}
+          {!collapsed && (
+            <img src={logo} alt="Logo" className="sidebar-logo" />
+          )}
 
-          <button onClick={toggleSidebar} className="toggle-btn" type="button">
-            {collapsed ? '→' : '←'}
+          <button
+            type="button"
+            className="toggle-btn"
+            onClick={toggleSidebar}
+          >
+            {collapsed ? "→" : "←"}
           </button>
         </div>
 
@@ -158,7 +166,7 @@ ${chat.reply}`;
               <button
                 type="button"
                 className="nav-link nav-button"
-                onClick={handleNewChat}
+                onClick={startNewChat}
               >
                 <FontAwesomeIcon icon={faUserDoctor} className="nav-icon" />
                 {!collapsed && <span className="nav-text">New Chat</span>}
@@ -168,7 +176,9 @@ ${chat.reply}`;
             <li>
               <Link to="/dashboard/page2" className="nav-link">
                 <FontAwesomeIcon icon={faFileLines} className="nav-icon" />
-                {!collapsed && <span className="nav-text">Document Library</span>}
+                {!collapsed && (
+                  <span className="nav-text">Document Library</span>
+                )}
               </Link>
             </li>
 
@@ -176,27 +186,29 @@ ${chat.reply}`;
               <li>
                 <Link to="/dashboard/admin" className="nav-link admin-link">
                   <FontAwesomeIcon icon={faChartLine} className="nav-icon" />
-                  {!collapsed && <span className="nav-text">Analytics</span>}
+                  {!collapsed && (
+                    <span className="nav-text">Analytics</span>
+                  )}
                 </Link>
               </li>
             )}
           </div>
 
-          {!collapsed && history.length > 0 && (
+          {!collapsed && chatHistory.length > 0 && (
             <div className="history-sidebar-section">
               <p className="history-sidebar-title">Recent Chats</p>
 
               <div className="history-sidebar-list">
-                {history.slice(0, 8).map((chat) => (
+                {chatHistory.slice(0, 8).map((chat) => (
                   <div
                     key={chat.id}
                     className="history-sidebar-row"
-                    ref={openMenuId === chat.id ? menuRef : null}
+                    ref={activeMenuId === chat.id ? menuRef : null}
                   >
                     <button
                       type="button"
                       className="history-sidebar-item"
-                      onClick={() => handleOpenChat(chat)}
+                      onClick={() => openChat(chat)}
                     >
                       {chat.prompt}
                     </button>
@@ -206,18 +218,20 @@ ${chat.reply}`;
                       className="chat-menu-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setOpenMenuId(openMenuId === chat.id ? null : chat.id);
+                        setActiveMenuId(
+                          activeMenuId === chat.id ? null : chat.id
+                        );
                       }}
                     >
                       ⋯
                     </button>
 
-                    {openMenuId === chat.id && (
+                    {activeMenuId === chat.id && (
                       <div className="chat-menu-dropdown">
                         <button
                           type="button"
-                          onClick={() => handleExport(chat)}
                           className="menu-option"
+                          onClick={() => exportChat(chat)}
                         >
                           <FontAwesomeIcon
                             icon={faDownload}
@@ -228,8 +242,8 @@ ${chat.reply}`;
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(chat.id)}
                           className="delete-option"
+                          onClick={() => deleteChat(chat.id)}
                         >
                           <FontAwesomeIcon
                             icon={faTrashCan}
@@ -260,7 +274,7 @@ ${chat.reply}`;
                     className="logout-icon-btn"
                     onClick={async (e) => {
                       e.stopPropagation();
-                      await handleLogout();
+                      await logoutUser();
                     }}
                   >
                     <FontAwesomeIcon
@@ -275,7 +289,7 @@ ${chat.reply}`;
         </nav>
       </aside>
 
-      <main className={`main-content ${collapsed ? 'expanded' : ''}`}>
+      <main className={`main-content ${collapsed ? "expanded" : ""}`}>
         <div className="content-wrapper">
           <Routes>
             <Route index element={<Page1 />} />
