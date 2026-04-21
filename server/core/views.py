@@ -61,8 +61,8 @@ class ChatProxyView(APIView):
 
         if chat_id:
             chat = Chat.objects.filter(user=user, id=chat_id).first()
-        if not chat:
-            chat = Chat.objects.create(user=user)
+            if not chat:
+                chat = Chat.objects.create(user=user)
         else:
             chat = Chat.objects.create(user=user)
 
