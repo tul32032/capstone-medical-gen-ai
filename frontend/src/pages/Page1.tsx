@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import "./Page1.css";
 import { API_BASE_URL } from "../constants/constants";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -60,71 +61,45 @@ const Page1 = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [chatId, setChatId] = useState<number | null>(null);
 
+  const [searchParams] = useSearchParams();
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const stored = JSON.parse(
-      localStorage.getItem("betesbot_active_chat") || "null"
-    );
-
-    if (stored) {
-      if (stored.messages) {
-        setChat(stored.messages);
+    const loadChat = async () => {
+      const chatIdParam = searchParams.get("chat_id");
+      if (chatIdParam) {
+        const id = parseInt(chatIdParam, 10);
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/core/history/?chat_id=${id}`, {
+            credentials: "include",
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const messages: Message[] = [];
+            for (const item of data.chat) {
+              messages.push({ role: "user", text: item.question });
+              messages.push({
+                role: "assistant",
+                text: item.answer,
+                citations: item.citation,
+              });
+            }
+            setChat(messages);
+            setStarted(true);
+            setChatId(id);
+          }
+        } catch (err) {
+          console.error("Failed to load chat:", err);
+        }
       } else {
-        setChat([
-          { role: "user", text: stored.prompt },
-          {
-            role: "assistant",
-            text: stored.reply,
-            citations: stored.citations || [],
-          },
-        ]);
+        setChat([]);
+        setStarted(false);
+        setChatId(null);
       }
-      setStarted(true);
-      setChatId(stored.id);
-    } else {
-      setChat([]);
-      setStarted(false);
-      setChatId(null);
-    }
-  }, []);
-
-  const updateHistory = (
-    id: number,
-    prompt: string,
-    reply: string,
-    citations: Citation[] = [],
-    messages: Message[] = []
-  ) => {
-    const existing = JSON.parse(localStorage.getItem("betesbot_history") || "[]");
-    const index = existing.findIndex((c: any) => c.id === id);
-
-    const updated = {
-      id,
-      prompt,
-      reply,
-      citations,
-      messages,
-      createdAt: new Date().toLocaleString(),
     };
 
-    if (index !== -1) {
-      existing[index] = {
-        ...existing[index],
-        ...updated,
-        prompt: existing[index].prompt || prompt,
-      };
-      localStorage.setItem("betesbot_history", JSON.stringify(existing));
-    } else {
-      localStorage.setItem(
-        "betesbot_history",
-        JSON.stringify([updated, ...existing])
-      );
-    }
-
-    localStorage.setItem("betesbot_active_chat", JSON.stringify(updated));
-    window.dispatchEvent(new Event("betesbot-history-updated"));
-  };
+    loadChat();
+  }, [searchParams]);
 
   const stopRequest = () => {
     abortRef.current?.abort();
@@ -201,13 +176,7 @@ const Page1 = () => {
         );
 
         if (newChatId !== null && newChatId !== undefined) {
-          updateHistory(
-            newChatId,
-            textToSend,
-            cleaned,
-            cites,
-            updatedMessages
-          );
+          window.dispatchEvent(new Event("betesbot-history-updated"));
         }
 
         return updatedMessages;

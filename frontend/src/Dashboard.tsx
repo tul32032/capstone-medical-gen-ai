@@ -21,12 +21,12 @@ import {
 
 import { useAuth } from "./context/AuthContext";
 import logo from "./assets/Betesbotlogo.png";
+import { API_BASE_URL } from "./constants/constants";
 
 type ChatHistoryItem = {
   id: number;
   prompt: string;
-  reply: string;
-  createdAt: string;
+  created_at: string;
 };
 
 const Dashboard = () => {
@@ -40,20 +40,18 @@ const Dashboard = () => {
   const { user, isAdmin, logout } = useAuth();
 
   useEffect(() => {
-    const fetchHistory = () => {
-      const raw = localStorage.getItem("betesbot_history");
-      const parsed = JSON.parse(raw || "[]");
-
-      const valid = parsed.filter(
-        (item: ChatHistoryItem) =>
-          item &&
-          typeof item.prompt === "string" &&
-          item.prompt.trim() !== "" &&
-          typeof item.reply === "string" &&
-          item.reply.trim() !== ""
-      );
-
-      setChatHistory(valid);
+    const fetchHistory = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/core/history/`, {
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setChatHistory(data.chats || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch chat history:", err);
+      }
     };
 
     fetchHistory();
@@ -89,53 +87,52 @@ const Dashboard = () => {
   };
 
   const startNewChat = () => {
-    localStorage.removeItem("betesbot_active_chat");
     navigate("/dashboard");
     window.location.reload();
   };
 
   const openChat = (chat: ChatHistoryItem) => {
-    localStorage.setItem("betesbot_active_chat", JSON.stringify(chat));
-    navigate("/dashboard");
+    navigate(`/dashboard?chat_id=${chat.id}`);
     window.location.reload();
   };
 
-  const deleteChat = (id: number) => {
-    const updatedList = chatHistory.filter((c) => c.id !== id);
-    setChatHistory(updatedList);
-    localStorage.setItem("betesbot_history", JSON.stringify(updatedList));
-
-    const active = JSON.parse(
-      localStorage.getItem("betesbot_active_chat") || "null"
-    );
-
-    if (active && active.id === id) {
-      localStorage.removeItem("betesbot_active_chat");
-    }
-
+  const deleteChat = async (_id: number) => {
     setActiveMenuId(null);
   };
 
-  const exportChat = (chat: ChatHistoryItem) => {
-    const fileContent = `BetesBot Chat Export
+  const exportChat = async (chat: ChatHistoryItem) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/core/history/?chat_id=${chat.id}`, {
+        credentials: "include",
+      });
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      const fileContent = `BetesBot Chat Export
 
-Date: ${chat.createdAt}
+Date: ${chat.created_at}
 
-Prompt:
-${chat.prompt}
+` + data.chat.map((item: any) => 
+`Question:
+${item.question}
 
-Response:
-${chat.reply}`;
+Answer:
+${item.answer}
 
-    const blob = new Blob([fileContent], { type: "text/plain" });
-    const url = window.URL.createObjectURL(blob);
+`).join("\n---\n\n");
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `betesbot-chat-${chat.id}.txt`;
-    a.click();
+      const blob = new Blob([fileContent], { type: "text/plain" });
+      const url = window.URL.createObjectURL(blob);
 
-    window.URL.revokeObjectURL(url);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `betesbot-chat-${chat.id}.txt`;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export chat:", err);
+    }
     setActiveMenuId(null);
   };
 

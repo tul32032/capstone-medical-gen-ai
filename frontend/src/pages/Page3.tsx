@@ -5,8 +5,7 @@ import { API_BASE_URL } from "../constants/constants";
 type ChatHistoryItem = {
   id: number;
   prompt: string;
-  reply: string;
-  createdAt: string;
+  created_at: string;
 };
 
 const Page3 = () => {
@@ -15,25 +14,23 @@ const Page3 = () => {
 useEffect(() => {
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/history/`, {
+      const res = await fetch(`${API_BASE_URL}/api/core/history/`, {
         method: "GET",
         credentials: "include",
       });
 
       const data = await res.json();
-      console.log("history response:", data);
 
-      if (data.error || !data.chat) {
+      if (data.error || !data.chats) {
         setHistory([]);
         return;
       }
 
       setHistory(
-        data.chat.map((item: any, index: number) => ({
-          id: index,
-          prompt: item.question,
-          reply: item.answer,
-          createdAt: item.timestamp,
+        data.chats.map((item: any) => ({
+          id: item.id,
+          prompt: item.prompt,
+          created_at: item.created_at,
         }))
       );
     } catch (err) {
@@ -44,26 +41,39 @@ useEffect(() => {
   fetchHistory();
 }, []);
 
-  const handleExport = (chat: ChatHistoryItem) => {
-    const text = `BetesBot Chat Export
+  const handleExport = async (chat: ChatHistoryItem) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/core/history/?chat_id=${chat.id}`, {
+        credentials: "include",
+      });
+      if (!res.ok) return;
+      
+      const data = await res.json();
+      const text = `BetesBot Chat Export
 
-Date: ${chat.createdAt}
+Date: ${chat.created_at}
 
-Prompt:
-${chat.prompt}
+` + data.chat.map((item: any) => 
+`Question:
+${item.question}
 
-Response:
-${chat.reply}`;
+Answer:
+${item.answer}
 
-    const blob = new Blob([text], { type: "text/plain" });
-    const url = window.URL.createObjectURL(blob);
+`).join("\n---\n\n");
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `betesbot-chat-${chat.id}.txt`;
-    link.click();
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = window.URL.createObjectURL(blob);
 
-    window.URL.revokeObjectURL(url);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `betesbot-chat-${chat.id}.txt`;
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export:", err);
+    }
   };
 
   return (
@@ -78,7 +88,7 @@ ${chat.reply}`;
             <div className="history-card-header">
               <div>
                 <h3 className="history-prompt">{chat.prompt}</h3>
-                <p className="history-date">{chat.createdAt}</p>
+                <p className="history-date">{chat.created_at}</p>
               </div>
 
               <button
