@@ -15,8 +15,6 @@ import {
   faCircleUser,
   faArrowRightFromBracket,
   faChartLine,
-  faTrashCan,
-  faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { useAuth } from "./context/AuthContext";
@@ -96,49 +94,8 @@ const Dashboard = () => {
     window.location.reload();
   };
 
-  const deleteChat = async (_id: number) => {
-    setActiveMenuId(null);
-  };
-
-  const exportChat = async (chat: ChatHistoryItem) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/history/?chat_id=${chat.id}`, {
-        credentials: "include",
-      });
-      if (!response.ok) return;
-      
-      const data = await response.json();
-      const fileContent = `BetesBot Chat Export
-
-Date: ${chat.created_at}
-
-` + data.chat.map((item: any) => 
-`Question:
-${item.question}
-
-Answer:
-${item.answer}
-
-`).join("\n---\n\n");
-
-      const blob = new Blob([fileContent], { type: "text/plain" });
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `betesbot-chat-${chat.id}.txt`;
-      a.click();
-
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Failed to export chat:", err);
-    }
-    setActiveMenuId(null);
-  };
-
-  const fullName = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-    : "Your Name";
+  const fullName =
+    user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "Your Name";
 
   return (
     <div className="dashboard-container">
@@ -209,47 +166,6 @@ ${item.answer}
                     >
                       {chat.prompt}
                     </button>
-
-                    <button
-                      type="button"
-                      className="chat-menu-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveMenuId(
-                          activeMenuId === chat.id ? null : chat.id
-                        );
-                      }}
-                    >
-                      ⋯
-                    </button>
-
-                    {activeMenuId === chat.id && (
-                      <div className="chat-menu-dropdown">
-                        <button
-                          type="button"
-                          className="menu-option"
-                          onClick={() => exportChat(chat)}
-                        >
-                          <FontAwesomeIcon
-                            icon={faDownload}
-                            style={{ marginRight: "6px" }}
-                          />
-                          Export
-                        </button>
-
-                        <button
-                          type="button"
-                          className="delete-option"
-                          onClick={() => deleteChat(chat.id)}
-                        >
-                          <FontAwesomeIcon
-                            icon={faTrashCan}
-                            style={{ marginRight: "6px", color: "red" }}
-                          />
-                          Delete
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
