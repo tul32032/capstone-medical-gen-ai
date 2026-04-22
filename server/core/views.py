@@ -66,7 +66,6 @@ class ChatProxyView(APIView):
         else:
             chat = Chat.objects.create(user=user)
 
-
         try:
             response = requests.post(
                 f"{AI_INFRA_BASE_URL}/api/v1/chat",
@@ -96,16 +95,16 @@ class ChatProxyView(APIView):
                 chat=chat,
                 question=message,
                 answer=answer,
-                citation=citations
-            )   
-            
+                citation=citations,
+            )
+
             return JsonResponse(
                 {
                     "chat_id": chat.id,
                     "answer": answer,
                     "citations": data.get("citations", []),
                 },
-                status=response.status_code
+                status=response.status_code,
             )
 
         except requests.exceptions.RequestException as e:
@@ -183,31 +182,41 @@ class ChatHistoryView(LoginRequiredMixin, View):
         chat_id = request.GET.get("chat_id")
 
         if not chat_id:
-            return JsonResponse({"error": "chat_id is required"}, status=400)
-        
-        chat = Chat.objects.filter(user=user, id=chat_id).first()
-        
-        if not chat:
-            return JsonResponse({
-            "error": "Chat not found",
-            "chat_id": chat_id
-        }, status=404)
+            chats = Chat.objects.filter(user=user).order_by("-created_at")
+            data = []
+            for chat in chats:
+                first_question = (
+                    Question.objects.filter(chat=chat).order_by("created_at").first()
+                )
+                data.append(
+                    {
+                        "id": chat.id,
+                        "prompt": first_question.question
+                        if first_question
+                        else "New Chat",
+                        "created_at": chat.created_at.isoformat(),
+                    }
+                )
+            return JsonResponse({"chats": data}, status=200)
 
-        questions = Question.objects.filter(
-            user=user,
-            chat=chat
-        ).order_by('created_at')
+        chat = Chat.objects.filter(user=user, id=chat_id).first()
+
+        if not chat:
+            return JsonResponse(
+                {"error": "Chat not found", "chat_id": chat_id}, status=404
+            )
+
+        questions = Question.objects.filter(user=user, chat=chat).order_by("created_at")
 
         data = []
         for q in questions:
-            data.append({
-                "question": q.question,
-                "answer": q.answer,
-                "citation": q.citation,
-                "timestamp": q.created_at.isoformat()
-            })
+            data.append(
+                {
+                    "question": q.question,
+                    "answer": q.answer,
+                    "citation": q.citation,
+                    "timestamp": q.created_at.isoformat(),
+                }
+            )
 
-        return JsonResponse({
-            "chat_id": chat.id,
-            "chat": data
-        }, status=200)
+        return JsonResponse({"chat_id": chat.id, "chat": data}, status=200)
