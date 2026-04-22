@@ -70,7 +70,7 @@ const Page1 = () => {
       if (chatIdParam) {
         const id = parseInt(chatIdParam, 10);
         try {
-          const response = await fetch(`${API_BASE_URL}/api/core/history/?chat_id=${id}`, {
+          const response = await fetch(`${API_BASE_URL}/api/history/?chat_id=${id}`, {
             credentials: "include",
           });
           if (response.ok) {

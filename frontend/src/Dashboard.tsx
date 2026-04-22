@@ -42,7 +42,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/core/history/`, {
+        const response = await fetch(`${API_BASE_URL}/api/history/`, {
           credentials: "include",
         });
         if (response.ok) {
@@ -102,7 +102,7 @@ const Dashboard = () => {
 
   const exportChat = async (chat: ChatHistoryItem) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/core/history/?chat_id=${chat.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/history/?chat_id=${chat.id}`, {
         credentials: "include",
       });
       if (!response.ok) return;
