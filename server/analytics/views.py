@@ -49,8 +49,8 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
             data = response.json()
 
             if isinstance(data, list):
-                documents = data
-                total_documents = len(data)
+                documents = [doc for doc in data if doc.get("status") == "ready"]
+                total_documents = len(documents)
 
         except (requests.RequestException, ValueError) as e:
             pass
@@ -70,7 +70,7 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
                 if row.total_cost is not None:
                     total_cost = float(row.total_cost)
 
-        except (GoogleAPIError, Exception):
+        except GoogleAPIError, Exception:
             pass
 
         return Response(
@@ -82,3 +82,41 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
                 "total_cost": total_cost,
             }
         )
+
+
+class DeleteDocumentApi(ApiAuthMixin, APIView):
+    authentication_classes = (JWTCookieAuthentication,)
+
+    def delete(self, request):
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "Admin access required"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        source = request.GET.get("source")
+
+        if not source:
+            return Response(
+                {"error": "source parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            response = requests.delete(
+                f"{AI_INFRA_BASE_URL}/query/{PROJECT_ID}/document",
+                params={"source": source},
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                timeout=10,
+            )
+
+            response.raise_for_status()
+
+        except (requests.RequestException, ValueError) as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response({"message": "Document deleted successfully"})
