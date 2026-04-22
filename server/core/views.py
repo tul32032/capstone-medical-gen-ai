@@ -25,28 +25,28 @@ API_KEY = os.environ.get("AI_INFRA_API_KEY", "")
 PROJECT_ID = os.environ.get("AI_INFRA_PROJECT_ID", "")
 
 SYSTEM_PROMPT = (
-    "You are an endocrinologist specializing in diabetes. Your role is to provide "
-    "accurate, evidence-based information about diabetes and its management.\n\n"
+    "You are an endocrinologist specializing in diabetes. Your goal is to provide "
+    "evidence-based information using ONLY the provided context.\n\n"
 
-    "Citations:\n"
-    "Every claim must end with a citation in the format: "
-    "[Source: Reference Number, Page Number]. "
-    "If the answer cannot be fully supported by the provided context, respond with: "
-    "'I cannot answer this based on the provided documents.'\n\n"
+    "Citation Rules:\n"
+    "- Every factual claim MUST end with a citation in this format: [#, p.#]\n"
+    "- # = reference number assigned in order of appearance\n"
+    "- p.# = page number from the source\n"
+    "- Do NOT include document names anywhere in the citation\n\n"
 
     "Response Structure:\n"
-    "1. Begin with a brief 1–2 sentence direct answer.\n"
-    "2. Follow with a detailed explanation using only the retrieved context.\n"
-    "3. End with a 'References' section listing all sources used in the format:\n"
-    "   1. Document Name\n"
-    "   2. Document Name\n\n"
+    "1. Provide a brief 1–2 sentence answer.\n"
+    "2. Provide a detailed explanation using only the context.\n"
+    "3. Provide a References section formatted EXACTLY like:\n"
+    "   References:\n"
+    "   [1]\n"
+    "   [2]\n\n"
 
-    "Safety and Constraints:\n"
-    "- Do not prescribe specific medication dosages.\n"
-    "- You may discuss general or standard ranges but must advise consulting a healthcare provider.\n"
-    "- Use clear, professional language; avoid unnecessary jargon unless explaining it.\n"
-    "- Strictly use only the provided document context.\n"
-    "- Do not use outside knowledge."
+    "Safety Constraints:\n"
+    "- Do NOT prescribe specific medication dosages.\n"
+    "- You may discuss general ranges but must direct users to their healthcare provider.\n"
+    "- Be clear and professional.\n"
+    "- Use ONLY the provided context. Do NOT use outside knowledge."
 )
 
 
@@ -90,7 +90,7 @@ class ChatProxyView(APIView):
                     "question": message,
                     "project_id": PROJECT_ID,
                     "system_prompt": SYSTEM_PROMPT,
-                    "min_score": 0.5,
+                    "min_score": 0.4,
                 },
             )
             data = response.json()
@@ -176,9 +176,11 @@ class UploadFile(View):
                 {
                     "success": complete_response.status_code in (200, 201, 202),
                     "status": complete_response.status_code,
-                    "message": "Infra accepted upload for processing"
-                    if complete_response.status_code == 202
-                    else "Upload successful",
+                    "message": (
+                        "Infra accepted upload for processing"
+                        if complete_response.status_code == 202
+                        else "Upload successful"
+                    ),
                     "infra_response": complete_response.json(),
                 },
                 status=complete_response.status_code,
@@ -207,9 +209,9 @@ class ChatHistoryView(APIView):
                 data.append(
                     {
                         "id": chat.id,
-                        "prompt": first_question.question
-                        if first_question
-                        else "New Chat",
+                        "prompt": (
+                            first_question.question if first_question else "New Chat"
+                        ),
                         "created_at": chat.created_at.isoformat(),
                     }
                 )
