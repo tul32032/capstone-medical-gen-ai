@@ -175,9 +175,31 @@
   text-transform: capitalize;
 }
 
-.document-status.completed {
+.document-status.completed,
+.document-status.ready {
   background: #dcfce7;
   color: #16a34a;
+}
+
+.document-delete-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #dc2626;
+  background: #fee2e2;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.document-delete-btn:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+.document-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .document-status.pending {

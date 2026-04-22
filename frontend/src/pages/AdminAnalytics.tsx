@@ -24,6 +24,7 @@ const AdminAnalytics = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -54,6 +55,38 @@ const AdminAnalytics = () => {
 
     fetchAnalytics();
   }, []);
+
+  const handleDelete = async (doc: Document) => {
+    if (!confirm(`Delete document "${doc.title}"?`)) {
+      return;
+    }
+
+    setDeletingId(doc.id);
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/analytics/document/?source=${encodeURIComponent(doc.title)}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to delete document");
+      }
+
+      setData((prev) => {
+        if (!prev) return null;
+        const docs = prev.documents.filter((d) => d.id !== doc.id);
+        return { ...prev, documents: docs, total_documents: docs.length };
+      });
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -136,6 +169,13 @@ const AdminAnalytics = () => {
                 <span className={`document-status ${doc.status}`}>
                   {doc.status}
                 </span>
+                <button
+                  className="document-delete-btn"
+                  onClick={() => handleDelete(doc)}
+                  disabled={deletingId === doc.id}
+                >
+                  {deletingId === doc.id ? "Deleting..." : "Delete"}
+                </button>
               </div>
             ))
           ) : (
