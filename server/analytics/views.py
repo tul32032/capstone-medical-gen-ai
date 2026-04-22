@@ -49,7 +49,9 @@ class AdminAnalyticsApi(ApiAuthMixin, APIView):
             data = response.json()
 
             if isinstance(data, list):
-                documents = [doc for doc in data if doc.get("status") == "ready"]
+                documents = [
+                    doc for doc in data if doc.get("status") in ("ready", "failed")
+                ]
                 total_documents = len(documents)
 
         except (requests.RequestException, ValueError) as e:
