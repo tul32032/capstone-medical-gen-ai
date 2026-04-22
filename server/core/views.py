@@ -175,7 +175,10 @@ class UploadFile(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class ChatHistoryView(LoginRequiredMixin, View):
+class ChatHistoryView(APIView):
+    authentication_classes = (JWTCookieAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         user = request.user
 
