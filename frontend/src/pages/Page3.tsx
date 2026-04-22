@@ -14,7 +14,7 @@ const Page3 = () => {
 useEffect(() => {
   const fetchHistory = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/core/history/`, {
+      const res = await fetch(`${API_BASE_URL}/api/history/`, {
         method: "GET",
         credentials: "include",
       });
@@ -43,7 +43,7 @@ useEffect(() => {
 
   const handleExport = async (chat: ChatHistoryItem) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/core/history/?chat_id=${chat.id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/history/?chat_id=${chat.id}`, {
         credentials: "include",
       });
       if (!res.ok) return;
