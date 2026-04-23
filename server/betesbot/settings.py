@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 from corsheaders.defaults import default_headers
+from datetime import timedelta
 
 load_dotenv()
 
@@ -167,6 +168,10 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "authentication.backends.JWTCookieAuthentication",
     ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
 }
 
 BASE_FRONTEND_URL = os.getenv(
