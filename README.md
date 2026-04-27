@@ -2,6 +2,9 @@
 
 A medical AI assistant for diabetes education. BetesBot allows users to ask questions about diabetes, view health information, and manage their chat history.
 
+## Live Demo
+[Demo](https://capstone-medical-gen-ai-fe-524283018158.us-east1.run.app/)
+
 ## Tech Stack
 
 - **Frontend**: React 19, TypeScript, Vite, React Router DOM
@@ -14,7 +17,7 @@ A medical AI assistant for diabetes education. BetesBot allows users to ask ques
 
 ```
 .
-├── docker-compose.yml          # Docker Compose configuration
+├── docker-compose.yml        # Docker Compose configuration
 ├── server/                   # Django backend
 │   ├── authentication/       # User authentication, OAuth, JWT
 │   ├── analytics/            # Query tracking, admin analytics
@@ -22,12 +25,12 @@ A medical AI assistant for diabetes education. BetesBot allows users to ask ques
 │   ├── pdf_processing/       # PDF to Markdown conversion
 │   ├── betesbot/             # Django project settings
 │   └── pyproject.toml        # Python dependencies
-└── frontend/                # React frontend
+└── frontend/                 # React frontend
     ├── src/
     │   ├── pages/
     │   │   ├── Page1.tsx     # Chat interface
     │   │   ├── Page2.tsx     # Document library
-    │   │   ├── Page3.tsx    # Additional page
+    │   │   ├── Page3.tsx     # History page
     │   │   └── AdminAnalytics.tsx
     │   ├── context/          # Auth context
     │   ├── constants/        # API configuration
@@ -37,14 +40,20 @@ A medical AI assistant for diabetes education. BetesBot allows users to ask ques
 
 ## Features
 
+- **Login/Signup**: Login with email and password or with Google
 - **Chat Interface**: Ask diabetes-related questions with AI-powered responses
-- **Quick Prompts**: Pre-configured questions for common topics
 - **Document Library**: Upload and manage PDF documents
-- **Chat History**: View, export, and delete past conversations
-- **Admin Analytics**: Track user queries (admin only)
-- **Authentication**: Google OAuth2 login with JWT cookie authentication
+- **Domain Specific**: Only responds with context from uploaded documents
+- **Chat History**: View past conversations
+- **Admin Analytics**: Track user queries and manage documents (admin only)
 
-## Setup
+## Known Bugs
+
+- **Signup without confirmation**: Signup with email does not require email confirmation
+- **PDF extraction accuracy**: PDF to text conversion has approximately a 1 in 30 chance of missing information due to the way PyMuPDF extracts PDF pages
+- **API cold start timeout**: Chat requests may timeout on the first attempt due to AI infrastructure API cold starts (retry typically succeeds)
+
+## Build, Install, and Configuration
 
 ### Prerequisites
 
@@ -53,7 +62,7 @@ A medical AI assistant for diabetes education. BetesBot allows users to ask ques
 
 ### Environment Variables
 
-Create `server/.env` with the following variables:
+Create `server/.env` in the project root with the following variables:
 
 ```env
 SECRET_KEY=your-secret-key
@@ -70,22 +79,53 @@ GOOGLE_OAUTH2_CLIENT_SECRET=your-client-secret
 DJANGO_BASE_FRONTEND_URL=http://localhost:3000
 ```
 
-### Running the Application
+Navigate to `frontend/constants/constants.ts` and change:
+```
+const USE_LOCAL = true
+```
+
+### Building the Project
+
+1. Ensure Docker Desktop or Docker daemon is running
+2. Navigate to the project root directory
+3. Build and start all containers:
 
 ```bash
 docker compose up --build
 ```
 
-The application will be available at:
-- Frontend: http://localhost:3000
-- API: http://localhost:8000
-- PostgreSQL: localhost:5432
+The Docker Compose configuration handles:
+- PostgreSQL database initialization
+- Django database migrations (`migrate`)
+- Gunicorn server setup with 4 workers
+- Frontend and backend serving
 
 ### Stopping the Application
+
+To stop all containers and remove volumes:
 
 ```bash
 docker compose down -v
 ```
+
+To stop without removing volumes (preserves data):
+
+```bash
+docker compose down
+```
+
+### Accessing the Application
+
+After successful build, the services are available at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **PostgreSQL**: localhost:5432
+
+### Troubleshooting
+
+- **Database connection issues**: Ensure PostgreSQL container is running (`docker compose ps`)
+- **Frontend not loading**: Check that the django-api container started successfully first
+- **JWT authentication failures**: Verify `SECRET_KEY` and `DEBUG` settings in `.env`
 
 ## API Endpoints
 
@@ -93,6 +133,12 @@ docker compose down -v
 - `POST /api/auth/google/` - Google OAuth login
 - `GET /api/auth/user/` - Get current user
 - `POST /api/auth/logout/` - Logout user
+- `GET /api/history/` - List user's chat history
+- `GET /api/history/?chat_id={id}` - Get specific chat messages
+- `DELETE /api/history/?chat_id={id}` - Delete a chat
 - `GET /api/analytics/queries/` - List queries (admin)
 - `GET /api/analytics/stats/` - Get analytics stats (admin)
+- `GET /api/analytics/admin/` - Get admin dashboard data including failed documents
+- `GET /api/analytics/document/?source={name}` - Get document details
+- `DELETE /api/analytics/document/?source={name}` - Delete a document (admin)
 - `POST /api/core/upload/` - Upload PDF document
